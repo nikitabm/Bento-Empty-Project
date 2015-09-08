@@ -1,0 +1,9 @@
+{
+    "path": "assets/main/",
+    "images": {
+        "numberslarge": "numberslarge.png",
+        "numberssmall": "numberssmall.png",
+        "buttonplay": "buttonplay.png",
+        "best": "best.png"
+    }
+}

@@ -1,0 +1,25 @@
+{
+    "name": "empty-bento-project",
+    "version": "0.0.1",
+    "author": {
+        "name": "Lucky Kat"
+    },
+    "devDependencies": {
+        "gulp-exec": "*",
+        "gulp-rename": "*",
+        "gulp-concat": "*",
+        "gulp-uglify": "*",
+        "gulp-jshint": "*",
+        "gulp-add-src": "*",
+        "gulp-usemin": "0.3.8",
+        "gulp-clean": "*",
+        "gulp-replace": "*",
+        "gulp.spritesmith": "*",
+        "spritesmith-texturepacker": "*",
+        "gulp-foreach": "*",
+        "gulp-json-editor": "*",
+        "gulp-tap": "*",
+        "gulp-zip": "*",
+        "gulp": "*"
+    }
+}
