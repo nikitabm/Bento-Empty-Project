@@ -68,6 +68,7 @@ gulp.task('copy', ['clean'], function () {
     // copy
     return gulp.src([
             './assets/**/*',
+            '!./assets/**/images/*',
             './lib/**/*',
             './index.html',
             './style.css'
@@ -116,8 +117,8 @@ gulp.task('getJSON', ['concat'], function () {
                 return json;
             }
             for (image in json.images) {
-                jsonFiles[currentFile].images.push(json.path + json.images[image]);
-                //console.log(json.images[image]);
+                jsonFiles[currentFile].images.push(json.path + 'images/' + json.images[image]);
+                // console.log(json.path + 'images/' + json.images[image]);
             }
             // edit it while we're at it
             name = currentFile.substring(0, currentFile.length - 5);
@@ -145,8 +146,8 @@ gulp.task('sprite', ['getJSON'], function () {
                 //console.log(path.basename(file.path));
             }))
             .pipe(spritesmith({
-                imgName: 'images/' + jsonName + ".png",
-                cssName: 'json/' + json,
+                imgName: jsonName + '/images/' + jsonName + ".png",
+                cssName: jsonName + '/json/' + json,
                 algorithm: 'binary-tree',
                 padding: 2,
                 cssTemplate: texturePackerTemplate // <-- this right here
@@ -159,7 +160,7 @@ gulp.task('sprite', ['getJSON'], function () {
 gulp.task('formatJSON', ['sprite'], function () {
     return gulp.src('assets/json/*.json')
         .pipe(tap(function (file) {
-            console.log(currentFile);
+            // console.log(currentFile);
         }))
         .pipe(jeditor(function (json) {
             var frame, f, frames;
@@ -190,16 +191,7 @@ gulp.task('default', ['clean', 'copy', 'concat', 'sprite'], function () {
         }))
         .pipe(gulp.dest('./build/'));
 });
-gulp.task('copyjs', ['sprite'], function () {
 
-});
-gulp.task('copyimg', ['copy'], function () {
-    return gulp.src([
-        './assets/images/**/*'
-    ], {
-        base: './'
-    }).pipe(gulp.dest('./build'));
-});
 gulp.task('cocoonjs', ['clean', 'copy', 'concat', 'cordovaReplace', 'sprite'], function () {
     return gulp.src([
             'js/**/*.js'
