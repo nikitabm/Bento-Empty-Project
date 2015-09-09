@@ -31,23 +31,22 @@ bento.define('screens/preloader', [
                 loaded = false,
                 time = 0,
                 timeout = 0,
-                background = Entity({
+                background = new Entity({
                     z: 0,
                     name: 'background',
                     components: [Fill],
                     addNow: true,
                     init: function () {}
                 }),
-                luckyKat = Entity({
+                luckyKat = new Entity({
                     z: 1,
                     name: 'lucky',
-                    position: Vector2(viewport.width / 2, viewport.height / 2),
-                    originRelative: Vector2(0.5, 0.5),
-                    components: [Sprite],
-                    family: [''],
-                    sprite: {
+                    position: new Vector2(viewport.width / 2, viewport.height / 2),
+                    originRelative: new Vector2(0.5, 0.5),
+                    components: [new Sprite({
                         image: Bento.assets.getImage('luckykat-160'),
-                    },
+                    })],
+                    family: [''],
                     addNow: true,
                     init: function () {
                         //this.scale.setScale(Vector2(2, 2));

@@ -1,3 +1,6 @@
+
+
+
 bento.require.config({
     baseUrl: 'js'
 });
@@ -18,7 +21,7 @@ window.startGame = function () {
         AutoResize,
         Utils
     ) {
-        var canvasDimension = AutoResize(Rectangle(0, 0, 160, 240), 160 - 16, 160 + 32, false);
+        var canvasDimension = AutoResize(new Rectangle(0, 0, 160, 240), 160 - 16, 160 + 32, false);
 
         Bento.setup({
             name: 'Empty Project',
