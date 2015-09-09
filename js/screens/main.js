@@ -8,7 +8,8 @@ bento.define('screens/main', [
     'bento/entity',
     'bento/utils',
     'bento/tween',
-    'bento/screen'
+    'bento/screen',
+    'entities/background'
 ], function (
     Bento,
     Vector2,
@@ -19,7 +20,8 @@ bento.define('screens/main', [
     Entity,
     Utils,
     Tween,
-    Screen
+    Screen,
+    Background
 ) {
     'use strict';
     var object = Screen({
@@ -27,7 +29,9 @@ bento.define('screens/main', [
     });
     Utils.extend(object, {
         onShow: function () {
-            var viewport = Bento.getViewport();
+            var viewport = Bento.getViewport(), 
+                background = Background();
+            Bento.objects.attach(background);
             
         }
     });

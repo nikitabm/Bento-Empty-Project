@@ -11,7 +11,7 @@ window.startGame = function () {
         'bento/math/vector2',
         'bento/math/rectangle',
         'bento/tween',
-        'bento/autoresize',
+        'autoresize',
         'utils'
     ], function (
         Bento,
@@ -21,7 +21,7 @@ window.startGame = function () {
         AutoResize,
         Utils
     ) {
-        var canvasDimension = AutoResize(new Rectangle(0, 0, 160, 240), 160 - 16, 160 + 32, false);
+        var canvasDimension = AutoResize();
 
         Bento.setup({
             name: 'Empty Project',

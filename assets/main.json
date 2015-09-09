@@ -4,6 +4,7 @@
         "numberslarge": "numberslarge.png",
         "numberssmall": "numberssmall.png",
         "buttonplay": "buttonplay.png",
-        "best": "best.png"
+        "best": "best.png",
+        "background": "bg.png"
     }
 }

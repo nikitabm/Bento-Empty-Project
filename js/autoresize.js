@@ -24,16 +24,10 @@ bento.define('autoresize', [
         var screenWidth = window.innerWidth * window.devicePixelRatio,
             screenHeight = window.innerHeight * window.devicePixelRatio,
             ratio,
-            rectangle = Rectangle(0, 0, 380, 214);
-
-        // get ratio
+            rectangle = new Rectangle(0, 0, 214, 380);
         ratio = screenWidth / screenHeight;
-        if (ratio < 1) {
-            ratio = 1 / ratio;
-        }
-        ratio = Math.min(ratio, 1.78);
-
-        rectangle.width = ratio * rectangle.height;
+        rectangle.height = rectangle.width / ratio;
+        rectangle.height = Math.min(rectangle.height, 380);
         return rectangle;
     };
 });
