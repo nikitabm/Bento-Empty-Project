@@ -30,15 +30,7 @@ bento.define('entities/background', [
         	    originRelative: new Vector2(0, 0),
         	    family: [''],
         	    components: [new Sprite({
-        	        image: Bento.assets.getImage('background')//,
-        	        // frameWidth: ,
-        	        // frameHeight: 380,
-        	        // animations: {
-        	        //     'default': {
-        	        //         speed: 0,
-        	        //         frames: [0]
-        	        //     }
-        	        // }
+        	        image: Bento.assets.getImage('background')
         	    })]
         	}) ; 
 
