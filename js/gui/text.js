@@ -82,7 +82,7 @@ bento.define('gui/text', [
             textBaseline = 'top',
             strings = [],
             spaceWidth = 0,
-            margin = Vector(8, 8),
+            margin = new Vector(8, 8),
             ySpacing = 0,
             overlaySprite = null,
             canvas = document.createElement('canvas'),
@@ -90,7 +90,7 @@ bento.define('gui/text', [
             canvasWidth = 1,
             canvasHeight = 1,
             compositeOperation = 'source-over',
-            packedImage = PackedImage(canvas),
+            packedImage = new PackedImage(canvas),
             extraWidthMult = 1,
             fontSizeCache = {},
             /**
@@ -109,7 +109,7 @@ bento.define('gui/text', [
                 // patch for blurry text in chrome
                 if (true || isChrome()) {
                     extraWidthMult = 4;
-                    textbox.scale.setScale(Vector(1 / extraWidthMult, 1 / extraWidthMult));
+                    textbox.scale.setScale(new Vector(1 / extraWidthMult, 1 / extraWidthMult));
                     if (textSettings.fontSize) {
                         textSettings.fontSize *= extraWidthMult;
                     }
@@ -264,7 +264,7 @@ bento.define('gui/text', [
                     y,
                     scale,
                     // extra offset because we may draw a line around the text
-                    offset = Vector(maxLineWidth / 2, maxLineWidth / 2),
+                    offset = new Vector(maxLineWidth / 2, maxLineWidth / 2),
                     origin = textbox.getOrigin(),
                     position = textbox.getPosition();
 
@@ -274,13 +274,13 @@ bento.define('gui/text', [
                 // clear
                 ctx.clearRect(0, 0, canvas.width, canvas.height);
                 // update baseobject
-                textbox.setDimension(Rectangle(0, 0, canvas.width, canvas.height));
+                textbox.setDimension(new Rectangle(0, 0, canvas.width, canvas.height));
 
                 // fit overlay onto canvas
                 if (overlaySprite) {
                     scale = canvas.width / overlaySprite.getDimension().width;
                     if (overlaySprite.scalable) {
-                        overlaySprite.scalable.setScale(Vector(scale, scale));
+                        overlaySprite.scalable.setScale(new Vector(scale, scale));
                     }
                 }
 
@@ -330,7 +330,7 @@ bento.define('gui/text', [
                     // pattern
                     if (!isEmpty(overlaySprite)) {
                         ctx.globalCompositeOperation = 'source-atop';
-                        overlaySprite.setPosition(Vector(x, y - fontSize));
+                        overlaySprite.setPosition(new Vector(x, y - fontSize));
                         overlaySprite.draw({
                             canvas: canvas,
                             context: ctx
@@ -358,7 +358,7 @@ bento.define('gui/text', [
                     }
                 }
                 restoreContext(ctx);
-                packedImage = PackedImage(canvas);
+                packedImage = new PackedImage(canvas);
             },
             /**
              * Restore context and previous font settings
@@ -595,10 +595,10 @@ bento.define('gui/text', [
                 Utils.extend(entity, mixin);
             },
             // public
-            textbox = Entity({
+            textbox = new Entity({
                 z: settings.z || 0,
                 name: settings.name || 'text',
-                position: settings.position || Vector(0, 0),
+                position: settings.position || new Vector(0, 0),
                 family: settings.family,
                 addNow: settings.addNow,
                 components: [Translation, Scale, Rotation, Opacity, drawComponent],
@@ -652,7 +652,7 @@ bento.define('gui/text', [
                     //obj.setText(Localization(id), maxW, maxH);
                 },
                 getRectangle: function () {
-                    return Rectangle(0, 0, canvas.width, canvas.height);
+                    return new Rectangle(0, 0, canvas.width, canvas.height);
                 }
             });
         init(settings);

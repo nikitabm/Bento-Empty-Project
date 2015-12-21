@@ -20,7 +20,7 @@ bento.define('entities/gamestate', [
     'use strict';
     return function () {
         var viewport = Bento.getViewport(),
-            entity = Entity({
+            entity = new Entity({
                 z: 0,
                 name: '',
                 init: function () {}

@@ -38,7 +38,7 @@ bento.define('utils', [
             return check;
         },
         timeout: function (time, callback, updateWhenPaused) {
-            var tween = Tween({
+            var tween = new Tween({
                 from: 0,
                 to: 1,
                 'in': time,

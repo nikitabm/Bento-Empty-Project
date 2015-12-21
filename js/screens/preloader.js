@@ -22,7 +22,7 @@ bento.define('screens/preloader', [
     Screen
 ) {
     'use strict';
-    var object = Screen({
+    var object = new Screen({
         dimension: Bento.getViewport()
     });
     Utils.extend(object, {
@@ -66,7 +66,7 @@ bento.define('screens/preloader', [
                 };
             object.base.onShow();
             Bento.assets.load('main', function (err) {
-                console.log('Main assets loaded')
+                console.log('Main assets loaded');
                 loaded = true;
                 end();
             }, function (current, total) {

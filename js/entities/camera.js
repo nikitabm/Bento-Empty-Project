@@ -6,10 +6,10 @@ bento.define('entities/camera', [
 ], function (Bento, Vector2, Entity, Utils) {
     'use strict';
     return function () {
-        var target = Vector2(0, 0),
+        var target = new Vector2(0, 0),
             viewport = Bento.getViewport(),
-            cameraSpeed = Vector2(1, 1),
-            shakePos = Vector2(0, 0),
+            cameraSpeed = new Vector2(1, 1),
+            shakePos = new Vector2(0, 0),
             shakeTimer = 0,
             shakeDuration = 0,
             shakeStrength = 0,
@@ -25,7 +25,7 @@ bento.define('entities/camera', [
                     shakePos.y = 0;
                 }
             },
-            camera = Entity({
+            camera = new Entity({
                 z: Utils.Constants.Layer.CAMERA,
                 name: 'camera',
                 family: ['camera'],

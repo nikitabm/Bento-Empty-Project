@@ -32,9 +32,9 @@ bento.define('entities/background', [
         	    components: [new Sprite({
         	        image: Bento.assets.getImage('background')
         	    })]
-        	}) ; 
+        	}) ;
 
-        return entity; 
+        return entity;
 
 
     };
