@@ -4,21 +4,15 @@ bento.define('gui/text', [
     'bento/math/rectangle',
     'bento/entity',
     'bento/utils',
-    'bento/components/translation',
-    'bento/components/rotation',
-    'bento/components/scale',
-    'bento/components/opacity',
+    'bento/components/sprite',
     'bento/packedimage'
 ], function (
     Bento,
-    Vector,
+    Vector2,
     Rectangle,
     Entity,
     Utils,
-    Translation,
-    Rotation,
-    Scale,
-    Opacity,
+    Sprite,
     PackedImage
 ) {
     'use strict';
@@ -80,9 +74,10 @@ bento.define('gui/text', [
             strokeStyle = ['black'],
             innerStroke = [false],
             textBaseline = 'top',
+            centerByCanvas = false, // quick fix
             strings = [],
             spaceWidth = 0,
-            margin = new Vector(8, 8),
+            margin = new Vector2(8, 8),
             ySpacing = 0,
             overlaySprite = null,
             canvas = document.createElement('canvas'),
@@ -90,7 +85,7 @@ bento.define('gui/text', [
             canvasWidth = 1,
             canvasHeight = 1,
             compositeOperation = 'source-over',
-            packedImage = new PackedImage(canvas),
+            packedImage = PackedImage(canvas),
             extraWidthMult = 1,
             fontSizeCache = {},
             /**
@@ -109,7 +104,7 @@ bento.define('gui/text', [
                 // patch for blurry text in chrome
                 if (true || isChrome()) {
                     extraWidthMult = 4;
-                    textbox.scale.setScale(new Vector(1 / extraWidthMult, 1 / extraWidthMult));
+                    textbox.scale = new Vector2(1 / extraWidthMult, 1 / extraWidthMult);
                     if (textSettings.fontSize) {
                         textSettings.fontSize *= extraWidthMult;
                     }
@@ -162,6 +157,9 @@ bento.define('gui/text', [
                 }
                 if (textSettings.textBaseline) {
                     textBaseline = textSettings.textBaseline;
+                }
+                if (textSettings.centerByCanvas) {
+                    centerByCanvas = textSettings.centerByCanvas;
                 }
                 if (Utils.isDefined(textSettings.fontWeight)) {
                     fontWeight = textSettings.fontWeight;
@@ -264,9 +262,9 @@ bento.define('gui/text', [
                     y,
                     scale,
                     // extra offset because we may draw a line around the text
-                    offset = new Vector(maxLineWidth / 2, maxLineWidth / 2),
-                    origin = textbox.getOrigin(),
-                    position = textbox.getPosition();
+                    offset = new Vector2(maxLineWidth / 2, maxLineWidth / 2),
+                    origin = textbox.origin,
+                    position = textbox.position;
 
                 // resize canvas based on text size
                 canvas.width = canvasWidth + maxLineWidth + margin.x * 2;
@@ -274,13 +272,14 @@ bento.define('gui/text', [
                 // clear
                 ctx.clearRect(0, 0, canvas.width, canvas.height);
                 // update baseobject
-                textbox.setDimension(new Rectangle(0, 0, canvas.width, canvas.height));
+                textbox.dimension = new Rectangle(0, 0, canvas.width, canvas.height);
 
+                // TODO: fix this if needed
                 // fit overlay onto canvas
                 if (overlaySprite) {
                     scale = canvas.width / overlaySprite.getDimension().width;
                     if (overlaySprite.scalable) {
-                        overlaySprite.scalable.setScale(new Vector(scale, scale));
+                        overlaySprite.scalable.setScale(new Vector2(scale, scale));
                     }
                 }
 
@@ -303,10 +302,10 @@ bento.define('gui/text', [
                     origin.y = 0;
                     break;
                 case 'middle':
-                    origin.y = canvasHeight / 2;
+                    origin.y = (centerByCanvas ? canvas.height : canvasHeight) / 2;
                     break;
                 case 'bottom':
-                    origin.y = canvasHeight;
+                    origin.y = (centerByCanvas ? canvas.height : canvasHeight);
                     break;
                 }
 
@@ -327,10 +326,11 @@ bento.define('gui/text', [
                     ctx.globalCompositeOperation = 'source-over';
                     ctx.fillText(strings[i].string, ~~x, ~~y + (navigator.isCocoonJS ? 0 : 0.5));
 
+
                     // pattern
                     if (!isEmpty(overlaySprite)) {
                         ctx.globalCompositeOperation = 'source-atop';
-                        overlaySprite.setPosition(new Vector(x, y - fontSize));
+                        overlaySprite.setPosition(new Vector2(x, y - fontSize));
                         overlaySprite.draw({
                             canvas: canvas,
                             context: ctx
@@ -358,7 +358,12 @@ bento.define('gui/text', [
                     }
                 }
                 restoreContext(ctx);
-                packedImage = new PackedImage(canvas);
+                canvas.texture = null;
+                packedImage = PackedImage(canvas);
+                sprite.animation.setup({
+                    image: packedImage
+                });
+
             },
             /**
              * Restore context and previous font settings
@@ -567,41 +572,18 @@ bento.define('gui/text', [
 
                 return grd;
             },
-            drawComponent = function (entity) {
-                var mixin = {},
-                    component = {
-                        name: 'text',
-                        draw: function (data) {
-                            var origin = textbox.getOrigin();
-                            // draw the offscreen canvas
-                            data.renderer.translate(Math.round(-origin.x), Math.round(-origin.y));
-                            data.renderer.drawImage(
-                                packedImage,
-                                0,
-                                0,
-                                packedImage.width,
-                                packedImage.height,
-                                0,
-                                0,
-                                packedImage.width,
-                                packedImage.height
-                            );
-                            //data.renderer.strokeRect([1, 0, 0, 1], 0, 0, canvas.width, canvas.height);
-                            data.renderer.translate(Math.round(origin.x), Math.round(origin.y));
-                        }
-                    };
-                entity.attach(component);
-                mixin[component.name] = component;
-                Utils.extend(entity, mixin);
-            },
+            sprite = new Sprite({
+                image: packedImage
+            }),
             // public
             textbox = new Entity({
                 z: settings.z || 0,
                 name: settings.name || 'text',
-                position: settings.position || new Vector(0, 0),
+                position: settings.position || new Vector2(0, 0),
                 family: settings.family,
                 addNow: settings.addNow,
-                components: [Translation, Scale, Rotation, Opacity, drawComponent],
+                float: settings.float,
+                components: [sprite],
                 init: function () {}
             }).extend({
                 /**
@@ -656,6 +638,11 @@ bento.define('gui/text', [
                 }
             });
         init(settings);
+
+        textbox.getComponent('translation', function (component) {
+            component.subPixel = true;
+        });
+
         return textbox;
     };
 });
