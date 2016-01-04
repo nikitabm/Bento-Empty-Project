@@ -24,15 +24,15 @@ bento.define('screens/main', [
     Background
 ) {
     'use strict';
-    var object = Screen({
+    var object = new Screen({
         dimension: Bento.getViewport()
     });
     Utils.extend(object, {
         onShow: function () {
-            var viewport = Bento.getViewport(), 
-                background = Background();
+            var viewport = Bento.getViewport(),
+                background = new Background();
             Bento.objects.attach(background);
-            
+
         }
     });
     return object;
