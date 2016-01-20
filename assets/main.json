@@ -1,10 +1,10 @@
 {
-    "path": "assets/main/",
     "images": {
-        "numberslarge": "numberslarge.png",
-        "numberssmall": "numberssmall.png",
-        "buttonplay": "buttonplay.png",
         "best": "best.png",
-        "background": "bg.png"
-    }
+        "bg": "bg.png",
+        "buttonplay": "buttonplay.png",
+        "numberslarge": "numberslarge.png",
+        "numberssmall": "numberssmall.png"
+    },
+    "path": "assets/main/"
 }

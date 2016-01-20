@@ -5,6 +5,10 @@
         "name": "Lucky Kat"
     },
     "devDependencies": {
+        "graceful-fs": "*",
+        "jsonfile": "*",
+        "vinyl": "*",
+        "gulp": "*",
         "gulp-exec": "*",
         "gulp-rename": "*",
         "gulp-concat": "*",
@@ -16,10 +20,10 @@
         "gulp-replace": "*",
         "gulp.spritesmith": "*",
         "spritesmith-texturepacker": "*",
+        "gulp-plumber": "*",
         "gulp-foreach": "*",
         "gulp-json-editor": "*",
         "gulp-tap": "*",
-        "gulp-zip": "*",
-        "gulp": "*"
+        "gulp-zip": "*"
     }
 }

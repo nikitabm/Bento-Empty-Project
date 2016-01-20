@@ -1,9 +1,13 @@
 {
-    "path": "assets/preloader/",
     "images": {
         "luckykat-160": "luckykat-160.png"
     },
     "audio": {
-        "sfx_silence": ["sfx_silence.ogg","sfx_silence.ac3","sfx_silence.mp3"]
-    }
+        "sfx_silence": [
+            "sfx_silence.mp3",
+            "sfx_silence.ogg",
+            "sfx_silence.ac3"
+        ]
+    },
+    "path": "assets/preloader/"
 }

@@ -1,9 +1,18 @@
+// undefine require
+if (window.require) {
+    window.require = undefined;
+}
+if (window.define) {
+    window.define = undefined;
+}
 
-
-
-bento.require.config({
-    baseUrl: 'js'
-});
+if (bento.require.config) {
+    // requirejs config
+    bento.require.config({
+        baseUrl: 'js',
+        waitSeconds: 0
+    });    
+}
 
 window.startGame = function () {
     bento.require([
@@ -76,12 +85,6 @@ document.addEventListener('deviceready', function () {
     } else {
         document.fireEvent(event.eventType, event);
     }
-    // add cocoon.js
-    setTimeout(function () {
-        var script = document.createElement('script');
-        script.src = "lib/cocoon.js";
-        document.body.appendChild(script);
-    }, 0)
 
     console.log('Starting web version');
 })();
