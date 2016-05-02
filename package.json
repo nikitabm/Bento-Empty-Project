@@ -24,6 +24,7 @@
         "gulp-zip": "3.0.2",
         "gulp.spritesmith": "6.0.0",
         "jsonfile": "2.2.3",
-        "spritesmith-texturepacker": "1.0.0"
+        "spritesmith-texturepacker": "1.0.0",
+        "vinyl": "1.1.1"
     }
 }
