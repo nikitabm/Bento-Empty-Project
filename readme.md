@@ -4,7 +4,7 @@ Use this project as a starting point for Bento projects
 
 ## Installation
 
-Install Node.js and use `npm install` or `sudo npm install` on Mac. Also install gulp.js. There are several `gulp` commands:
+Install Node.js and install gulp.js globally (`npm install -g gulp`). Use `npm install` or `sudo npm install` on Mac to install all dependencies. There are several `gulp` commands:
 
 * `gulp collect-assets`: Collects all assets to load in assets.json. (Much easier than managing assets by hand)
 * `gulp collector`: Watches the assets folder. Placing assets in the assets folder automatically runs collect-assets.
