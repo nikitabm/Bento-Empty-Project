@@ -20,7 +20,7 @@ window.startGame = function () {
         'bento/math/vector2',
         'bento/math/rectangle',
         'bento/tween',
-        'autoresize',
+        'bento/autoresize',
         'utils'
     ], function (
         Bento,
@@ -30,17 +30,27 @@ window.startGame = function () {
         AutoResize,
         Utils
     ) {
-        var canvasDimension = AutoResize();
-
+        var canvasDimension = AutoResize(new Rectangle(0, 0, 160, 284), 240, 284);
+        
+        if (!window.Cocoon && !Utils.isMobile()) {
+            // on desktop
+            canvasDimension = new Rectangle(0, 0, 160, 284);
+        }
+        
         Bento.setup({
             name: 'Empty Project',
             canvasId: 'canvas',
             canvasDimension: canvasDimension,
-            assetGroups: {
-                'main': 'assets/main.json',
-                'preloader': 'assets/preloader.json'
+            renderer: 'canvas2d',
+            pixelSize: 2,
+            subPixel: true,
+            preventContextMenu: true,
+            reload: {
+                simple: 'mouseDown-right',
+                assets: 'buttonDown-1',
+                jump: 'buttonDown-2'
             },
-            renderer: 'auto'
+            dev: true
         }, function () {
             // cocoonjs
             if (Utils.isCocoonJS() && window.Cocoon) {

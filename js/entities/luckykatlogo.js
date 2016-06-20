@@ -1,18 +1,19 @@
 /**
- * Main screen
+ * Lucky Kat logo
  */
-bento.define('screens/main', [
+bento.define('entities/luckykatlogo', [
     'bento',
     'bento/math/vector2',
     'bento/math/rectangle',
     'bento/components/sprite',
     'bento/components/clickable',
     'bento/entity',
+    'bento/gui/clickbutton',
+    'bento/gui/counter',
+    'bento/gui/text',
     'bento/eventsystem',
     'bento/utils',
-    'bento/screen',
-    'bento/tween',
-    'entities/luckykatlogo'
+    'bento/tween'
 ], function (
     Bento,
     Vector2,
@@ -20,34 +21,31 @@ bento.define('screens/main', [
     Sprite,
     Clickable,
     Entity,
+    ClickButton,
+    Counter,
+    Text,
     EventSystem,
     Utils,
-    Screen,
-    Tween,
-    LuckyKat
+    Tween
 ) {
     'use strict';
-    var onShow = function () {
-        /* Screen starts here */
+    return function (settings) {
+        /*settings = {
+            // describe your settings object parameters
+            position: Vector2 // positions the entity
+        }*/
         var viewport = Bento.getViewport();
-        var background = new Entity({
-            z: 0,
-            name: 'background',
+        var entity = new Entity({
+            z: 1,
+            name: 'luckyKatLogo',
             position: new Vector2(viewport.width / 2, viewport.height / 2),
             originRelative: new Vector2(0.5, 0.5),
             components: [
                 new Sprite({
-                    imageName: 'background'
+                    imageName: 'luckykat-160',
                 })
             ]
         });
-        var luckyKat = new LuckyKat({});
-
-        Bento.objects.attach(background);
-        Bento.objects.attach(luckyKat);
+        return entity;
     };
-
-    return new Screen({
-        onShow: onShow
-    });
 });

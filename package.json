@@ -11,6 +11,7 @@
         "gulp-clean": "0.3.1",
         "gulp-concat": "2.6.0",
         "gulp-exec": "2.1.2",
+        "gulp-fontmin": "0.7.3",
         "gulp-foreach": "0.1.0",
         "gulp-jshint": "1.11.2",
         "gulp-json-editor": "2.2.1",
@@ -25,6 +26,8 @@
         "gulp.spritesmith": "6.0.0",
         "jsonfile": "2.2.3",
         "spritesmith-texturepacker": "1.0.0",
-        "vinyl": "1.1.1"
+        "vinyl": "1.1.1",
+        "json-stable-stringify": "1.0.1",
+        "merge-stream": "1.0.0"
     }
 }

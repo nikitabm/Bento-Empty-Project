@@ -1,3 +1,6 @@
+/**
+ * Screen description
+ */
 bento.define('screens/preloader', [
     'bento',
     'bento/math/vector2',
@@ -5,10 +8,13 @@ bento.define('screens/preloader', [
     'bento/components/sprite',
     'bento/components/clickable',
     'bento/components/fill',
+    'bento/gui/text',
     'bento/entity',
+    'bento/eventsystem',
     'bento/utils',
+    'bento/screen',
     'bento/tween',
-    'bento/screen'
+    'entities/luckykatlogo'
 ], function (
     Bento,
     Vector2,
@@ -16,63 +22,91 @@ bento.define('screens/preloader', [
     Sprite,
     Clickable,
     Fill,
+    Text,
     Entity,
+    EventSystem,
     Utils,
+    Screen,
     Tween,
-    Screen
+    LuckyKat
 ) {
     'use strict';
-    var object = new Screen({
-        dimension: Bento.getViewport()
-    });
-    Utils.extend(object, {
-        onShow: function () {
-            var viewport = Bento.getViewport(),
-                loaded = false,
-                time = 0,
-                timeout = 0,
-                background = new Entity({
-                    z: 0,
-                    name: 'background',
-                    components: [Fill],
-                    addNow: true,
-                    init: function () {}
-                }),
-                luckyKat = new Entity({
-                    z: 1,
-                    name: 'lucky',
-                    position: new Vector2(viewport.width / 2, viewport.height / 2),
-                    originRelative: new Vector2(0.5, 0.5),
-                    components: [new Sprite({
-                        image: Bento.assets.getImage('luckykat-160'),
-                    })],
-                    family: [''],
-                    addNow: true,
-                    init: function () {
-                        //this.scale.setScale(Vector2(2, 2));
-                    }
-                }).attach({
-                    update: function () {
-                        time += 1;
-                        if (time > timeout) {
-                            end();
-                        }
-                    }
-                }),
-                end = function () {
-                    if (loaded && time > timeout) {
-                        Bento.screens.show('screens/main');
-                    }
-                };
-            object.base.onShow();
-            Bento.assets.load('main', function (err) {
-                console.log('Main assets loaded');
+    var onShow = function () {
+        /* Screen starts here */
+        var viewport = Bento.getViewport();
+        var loaded = false;
+        var background = new Entity({
+            z: 0,
+            name: 'background',
+            components: [
+                new Fill({})
+            ]
+        });
+        var luckyKat = new LuckyKat({});
+        var text = Text({
+            z: 1,
+            name: 'loadingText',
+            font: 'font',
+            fontSize: 12,
+            fontColor: '#fff',
+            text: '',
+            align: 'left',
+            textBaseline: 'top',
+            position: new Vector2(0, 0)
+        });
+        var end = function () {
+            if (loaded) {
+                Bento.screens.show('screens/main');
+            }
+        };
+        var loadFonts = function () {
+            var fonts = Bento.assets.getAssetGroups().preloader.fonts;
+            var font;
+            if (!fonts) {
+                return;
+            }
+            for (font in fonts) {
+                if (!fonts.hasOwnProperty(font)) {
+                    continue;
+                }
+                new Text({
+                    position: new Vector2(1000, 1000),
+                    text: '.',
+                    font: font
+                });
+            }
+        };
+
+        Bento.objects.attach(background);
+        Bento.objects.attach(text);
+        Bento.objects.attach(luckyKat);
+
+        // preload fonts
+        loadFonts();
+
+        // hide cordova splashscreen if exists
+        if (navigator.splashscreen) {
+            navigator.splashscreen.hide();
+        }
+
+        Bento.assets.loadAllAssets({
+            exceptions: ['preloader'], // preloader was already loaded
+            onLoaded: function (current, total) {
+                // show how many assets still to be loaded
+                if (Utils.isCocoonJS()) {
+                    return;
+                }
+                text.setText('Loading ' + current + '/' + total);
+            },
+            onReady: function () {
+                console.log('All assets loaded');
                 loaded = true;
                 end();
-            }, function (current, total) {
-                console.log(current + '/' + total);
-            });
-        }
+            }
+        });
+    };
+
+    return new Screen({
+        onShow: onShow
     });
-    return object;
 });

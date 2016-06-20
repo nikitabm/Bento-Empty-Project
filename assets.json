@@ -1,0 +1,28 @@
+{
+    "main": {
+        "images": {
+            "background": "background.png",
+            "best": "best.png",
+            "buttonplay": "buttonplay.png",
+            "numberslarge": "numberslarge.png",
+            "numberssmall": "numberssmall.png"
+        },
+        "path": "assets/main/"
+    },
+    "preloader": {
+        "audio": {
+            "sfx_silence": [
+                "sfx_silence.ogg",
+                "sfx_silence.mp3",
+                "sfx_silence.ac3"
+            ]
+        },
+        "fonts": {
+            "font": "font.ttf"
+        },
+        "images": {
+            "luckykat-160": "luckykat-160.png"
+        },
+        "path": "assets/preloader/"
+    }
+}
