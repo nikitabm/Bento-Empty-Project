@@ -15,8 +15,7 @@ bento.define('utils', [
     Clickable,
     Entity,
     Utils,
-    Tween,
-    SaveState
+    Tween
 ) {
     'use strict';
     var utils = {
