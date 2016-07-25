@@ -61,14 +61,14 @@ window.startGame = function () {
             });
         });
     });
-}
+};
 
 document.addEventListener('deviceready', function () {
     if (navigator.splashscreen) {
         navigator.splashscreen.hide();
-        startGame();
+        window.startGame();
     } else {
-        startGame();
+        window.startGame();
     }
 }, false);
 
