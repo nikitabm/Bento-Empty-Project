@@ -32,7 +32,7 @@ window.startGame = function () {
     ) {
         var canvasDimension = AutoResize(new Rectangle(0, 0, 160, 284), 240, 284);
         
-        if (!window.Cocoon && !Utils.isMobile()) {
+        if (!Utils.isCocoonJs() && !Utils.isMobileBrowser()) {
             // on desktop
             canvasDimension = new Rectangle(0, 0, 160, 284);
         }
@@ -50,6 +50,7 @@ window.startGame = function () {
                 assets: 'buttonDown-1',
                 jump: 'buttonDown-2'
             },
+            screenshot: 'buttonDown-q',
             dev: true
         }, function () {
             // cocoonjs
