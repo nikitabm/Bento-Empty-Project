@@ -13,6 +13,7 @@ var exec = require('child_process').exec;
 var os = require('os');
 var jsonFiles = {};
 var jsons = {};
+var spriteJsons = {};
 var onError = function (err) {
     console.log(err);
     this.emit('end');
@@ -419,13 +420,18 @@ gulp.task('uglify', ['replace', 'replaceDev'], function () {
         .pipe(gulp.dest('./'));
 });
 gulp.task('getJSON', ['copy'], function () {
-    // TODO: make compatible with assets.json
+    // This task reads the assets json file and prepares it for texturepacker settings
     var jeditor = require("gulp-json-editor");
     var currentFile;
+
+    // TODO: make compatible with assets.json
+    // for now we grab the global jsons variable that was calculated by collect-assets
+    spriteJsons = JSON.parse(JSON.stringify(jsons));
+
     // return gulp.src('assets/*.json')
     return toFile({
             path: 'assets.json',
-            contents: new Buffer(JSON.stringify(jsons))
+            contents: new Buffer(JSON.stringify(spriteJsons))
         })
         // .pipe(tap(function (file) {
         //     currentFile = path.basename(file.path);
@@ -436,29 +442,32 @@ gulp.task('getJSON', ['copy'], function () {
         .pipe(jeditor(function (file) {
             var i, image, name;
             var images = [];
-            var json;
+            var group;
 
-            for (currentFile in jsons) {
-                json = jsons[currentFile];
-                if (!json.images) {
-                    continue;
-                }
+            // go through all asset groups and init .images and .texturePacker
+            for (currentFile in spriteJsons) {
+                group = spriteJsons[currentFile];
                 jsonFiles[currentFile] = {};
                 jsonFiles[currentFile].images = [];
 
-                for (image in json.images) {
-                    jsonFiles[currentFile].images.push(json.path + 'images/' + json.images[image]);
-                    // console.log(json.path + 'images/' + json.images[image]);
+                if (!group.images) {
+                    // this asset group has no images
+                    continue;
+                }
+
+                for (image in group.images) {
+                    jsonFiles[currentFile].images.push(group.path + 'images/' + group.images[image]);
+                    // console.log(group.path + 'images/' + group.images[image]);
                 }
                 // edit it while we're at it
                 name = currentFile;
-                json.images = {};
-                json.images[name] = name + '.png';
-                json.texturePacker = {};
-                json.texturePacker[name] = currentFile + '.json';
+                group.images = {};
+                group.images[name] = name + '.png';
+                group.texturePacker = {};
+                group.texturePacker[name] = currentFile + '.json';
 
             }
-            return jsons; // must return JSON object.
+            return spriteJsons; // must return JSON object.
         }))
         .pipe(gulp.dest('./build/'));
 });
@@ -466,7 +475,7 @@ gulp.task('sprite', ['getJSON'], function () {
     var jeditor = require("gulp-json-editor");
     var spritesmith = require('gulp.spritesmith');
     var mergeStreams = require('merge-stream')();
-    var json, name;
+    var group, name;
     var addStream = function (jsonIn) {
         var i;
         var images = [];
@@ -497,9 +506,11 @@ gulp.task('sprite', ['getJSON'], function () {
         mergeStreams.add(stream);
     };
 
-    for (name in jsons) {
-        json = jsons[name];
-        addStream(json);
+    for (name in spriteJsons) {
+        group = spriteJsons[name];
+        if (group.images) {
+            addStream(group);
+        }
     }
 
     return mergeStreams;
