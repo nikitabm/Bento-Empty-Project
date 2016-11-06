@@ -31,6 +31,10 @@ var toFile = function (file) {
     return src;
 };
 
+// define custom tasks
+require('./scripts/customtasks');
+
+
 var audioFormats = [
     'assets/**/*.ogg',
     'assets/**/*.mp3',
