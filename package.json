@@ -25,6 +25,7 @@
         "gulp-zip": "3.0.2",
         "gulp.spritesmith": "6.0.0",
         "merge-stream": "1.0.0",
+        "inquirer": "2.0.0",
         "jsonfile": "2.2.3",
         "json-stable-stringify": "1.0.1",
         "spritesmith-texturepacker": "1.0.0",
