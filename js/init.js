@@ -7,14 +7,16 @@ bento.define('init', [
     'bento/math/rectangle',
     'bento/tween',
     'bento/eventsystem',
-    'utils'
+    'utils',
+    'modules/localization'
 ], function (
     Bento,
     Vector2,
     Rectangle,
     Tween,
     EventSystem,
-    Utils
+    Utils,
+    Localization
 ) {
     'use strict';
     return function () {
@@ -40,9 +42,22 @@ bento.define('init', [
                 window.Cocoon.Utils.setAntialias(false);
             }
         };
+        /**
+         * Init localization
+         */
+        var initLocalization = function () {
+            // find system language (language is set in preloader screen)
+            Localization.init();
+
+            // clean unused language assets (note: this means you cannot change language after startup)
+            if (!Bento.isDev()) {
+                Localization.cleanUnusedAssets();
+            }
+        };
 
         clearScreen();
         antiAliasing();
+        initLocalization();
 
         /**
          * Start preloader

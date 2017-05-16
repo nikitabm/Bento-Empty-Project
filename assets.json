@@ -23,6 +23,30 @@
         "images": {
             "luckykat-160": "luckykat-160.png"
         },
+        "json": {
+            "localization/general/de": "localization/general/de.json",
+            "localization/general/en": "localization/general/en.json",
+            "localization/general/es": "localization/general/es.json",
+            "localization/general/fr": "localization/general/fr.json",
+            "localization/general/it": "localization/general/it.json",
+            "localization/general/ja": "localization/general/ja.json",
+            "localization/general/ko": "localization/general/ko.json",
+            "localization/general/pt": "localization/general/pt.json",
+            "localization/general/ru": "localization/general/ru.json",
+            "localization/general/zh": "localization/general/zh.json",
+            "localization/general/zt": "localization/general/zt.json",
+            "localization/text/de": "localization/text/de.json",
+            "localization/text/en": "localization/text/en.json",
+            "localization/text/es": "localization/text/es.json",
+            "localization/text/fr": "localization/text/fr.json",
+            "localization/text/it": "localization/text/it.json",
+            "localization/text/ja": "localization/text/ja.json",
+            "localization/text/ko": "localization/text/ko.json",
+            "localization/text/pt": "localization/text/pt.json",
+            "localization/text/ru": "localization/text/ru.json",
+            "localization/text/zh": "localization/text/zh.json",
+            "localization/text/zt": "localization/text/zt.json"
+        },
         "path": "assets/preloader/"
     }
 }

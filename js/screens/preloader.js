@@ -15,7 +15,8 @@ bento.define('screens/preloader', [
     'bento/screen',
     'bento/tween',
     'entities/luckykatlogo',
-    'globals'
+    'globals',
+    'modules/localization'
 ], function (
     Bento,
     Vector2,
@@ -30,9 +31,19 @@ bento.define('screens/preloader', [
     Screen,
     Tween,
     LuckyKat,
-    Globals
+    Globals,
+    Localization
 ) {
     'use strict';
+    var initPostPreloader = function () {
+        // hide cordova splashscreen if exists
+        if (navigator.splashscreen) {
+            navigator.splashscreen.hide();
+        }
+
+        // Localization language is set after localized json files are loaded
+        Localization.setLanguage();
+    };
     var onShow = function () {
         /* Screen starts here */
         var viewport = Bento.getViewport();
@@ -79,6 +90,8 @@ bento.define('screens/preloader', [
             }
         };
 
+        initPostPreloader();
+
         Bento.objects.attach(background);
         Bento.objects.attach(text);
         Bento.objects.attach(luckyKat);
@@ -86,22 +99,14 @@ bento.define('screens/preloader', [
         // preload fonts
         loadFonts();
 
-        // hide cordova splashscreen if exists
-        if (navigator.splashscreen) {
-            navigator.splashscreen.hide();
-        }
-
+        // we will now load all other assets
         Bento.assets.loadAllAssets({
             exceptions: ['preloader'], // preloader was already loaded
             onLoaded: function (current, total) {
                 // show how many assets still to be loaded
-                if (Utils.isCocoonJS()) {
-                    return;
-                }
                 text.setText('Loading ' + current + '/' + total);
             },
             onReady: function () {
-                console.log('All assets loaded');
                 loaded = true;
                 end();
             }
