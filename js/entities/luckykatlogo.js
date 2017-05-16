@@ -39,7 +39,6 @@ bento.define('entities/luckykatlogo', [
             z: 1,
             name: 'luckyKatLogo',
             position: new Vector2(viewport.width / 2, viewport.height / 2),
-            boundingBox: new Rectangle(-80, -80, 160, 160),
             components: [
                 new Sprite({
                     imageName: 'luckykat-160',
