@@ -14,7 +14,8 @@ bento.define('screens/preloader', [
     'bento/utils',
     'bento/screen',
     'bento/tween',
-    'entities/luckykatlogo'
+    'entities/luckykatlogo',
+    'globals'
 ], function (
     Bento,
     Vector2,
@@ -28,7 +29,8 @@ bento.define('screens/preloader', [
     Utils,
     Screen,
     Tween,
-    LuckyKat
+    LuckyKat,
+    Globals
 ) {
     'use strict';
     var onShow = function () {

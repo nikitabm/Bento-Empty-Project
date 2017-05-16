@@ -1,3 +1,7 @@
+/**
+ * Extends utils with more useful functions.
+ * See bento/utils
+ */
 bento.define('utils', [
     'bento',
     'bento/math/vector2',
@@ -19,20 +23,15 @@ bento.define('utils', [
 ) {
     'use strict';
     var utils = {
-        Layers: {
-            /* Add your layer constants here */
-            CAMERA: -10,
-            BACKGROUND: 0,
-            PLAYER: 100,
-            GUI: 200
-        },
-        timeout: function (time, callback, updateWhenPaused) {
+        /**
+         * Wrapper for tweens to simulate a timeout
+         */
+        timeout: function (time, callback) {
             var tween = new Tween({
                 from: 0,
                 to: 1,
-                'in': time,
+                in: time,
                 ease: 'linear',
-                updateWhenPaused: updateWhenPaused,
                 onComplete: callback
             });
             return tween;

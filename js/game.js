@@ -11,7 +11,7 @@ if (bento.require.config) {
     bento.require.config({
         baseUrl: 'js',
         waitSeconds: 0
-    });    
+    });
 }
 
 window.startGame = function () {
@@ -21,22 +21,24 @@ window.startGame = function () {
         'bento/math/rectangle',
         'bento/tween',
         'bento/autoresize',
-        'utils'
+        'utils',
+        'init'
     ], function (
         Bento,
         Vector2,
         Rectangle,
         Tween,
         AutoResize,
-        Utils
+        Utils,
+        Init
     ) {
-        var canvasDimension = AutoResize(new Rectangle(0, 0, 160, 284), 240, 284);
-        
+        var canvasDimension = new AutoResize(new Rectangle(0, 0, 160, 284), 240, 284);
+
         if (!Utils.isCocoonJs() && !Utils.isMobileBrowser()) {
             // on desktop
             canvasDimension = new Rectangle(0, 0, 160, 284);
         }
-        
+
         Bento.setup({
             name: 'Empty Project',
             canvasId: 'canvas',
@@ -53,26 +55,18 @@ window.startGame = function () {
             screenshot: 'buttonDown-q',
             dev: true
         }, function () {
-            // cocoonjs
-            if (Utils.isCocoonJS() && window.Cocoon) {
-                window.Cocoon.Utils.setAntialias(false);
-            }
-            Bento.assets.load('preloader', function (err) {
-                Bento.screens.show('screens/preloader');
-            });
+            Init();
         });
     });
 };
 
+// entry points for cordova apps
 document.addEventListener('deviceready', function () {
-    if (navigator.splashscreen) {
-        navigator.splashscreen.hide();
-        window.startGame();
-    } else {
-        window.startGame();
-    }
+    window.startGame();
 }, false);
 
+// since browsers don't fire the deviceready event, we simulate one here
+// remove this part during the build process for cordova apps!
 /* remove:start */
 (function () {
     var event;
