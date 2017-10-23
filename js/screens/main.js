@@ -45,7 +45,7 @@ bento.define('screens/main', [
             components: [
                 new Sprite({
                     imageName: 'background',
-                    originRelative: new Vector2(0.5, 0.5)
+                    originRelative: new Vector2(0.5, 0.5),
                 })
             ]
         });
