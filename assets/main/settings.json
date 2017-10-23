@@ -1,0 +1,5 @@
+{
+    "packImages": true,
+    "packJson": true,
+    "packSpriteSheets": "full"
+}
