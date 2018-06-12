@@ -4,7 +4,7 @@ Use this project as a starting point for Bento projects.
 
 ## Installation
 
-Just download the whole git repo. Or install the Bento CLI tool: https://github.com/LuckyKat/bento-cli
+Just download the whole git repo.
 
 ## Gulp
 
@@ -16,3 +16,7 @@ Want to use gulp manually? Use these commands:
 * `gulp build-cocoonjs`: For deploying a Cocoon.io project. Minifies Javascript files, inserts Cordova references.
 * `gulp build-cocoontest`: Builds a Cocoon.io project without minifying (easier for debugging).
 * `gulp watch`: Watches the assets and js folder. Automatically runs build-cocoontest
+* `gulp build-cordova`: Creates a cordova project (NOTE: requires cordova 6.5.0 or lower)
+* `gulp prepare-cordova`: Runs `cordova prepare` in the cordova project
+* `gulp deploy-android`: Builds and signs an apk
+

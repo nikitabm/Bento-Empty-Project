@@ -434,7 +434,7 @@ gulp.task('replace', ['copyJs'], function () {
             base: './'
         })
         .pipe(replace('DEV_MODE: true', 'DEV_MODE: false'))
-        .pipe(replace(/\/\* remove\:start \*\/([\S+\n\r\s]+)\/\* remove\:end \*\//g, ''))
+        .pipe(replace(/\/\* remove\:start \*\/([\S+\n\r\s]+?)\/\* remove\:end \*\//g, ''))
         .pipe(replace('/*replace:version*/', 'window.VERSION = "' + xmlInfo.version + '";'))
         .pipe(replace('/*replace:build*/', 'window.BUILD = ' + xmlInfo.build + ';')) // this is android build number
         .pipe(gulp.dest('./'));

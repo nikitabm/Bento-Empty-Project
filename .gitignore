@@ -1,3 +1,5 @@
+!*/cordova/
+/cordova/
 /build/
 /node_modules/
 *.log
