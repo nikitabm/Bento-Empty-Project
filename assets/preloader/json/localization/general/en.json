@@ -3,10 +3,12 @@
     "askLike": "Do you like {TITLE}?",
     "comingsoon": "Coming Soon",
     "restore": "Restore purchases",
-    "restored": "Your purchases has been restored!",
+    "restoring": "Restoring...",
+    "restored": "Your purchases have been restored!",
     "noAd": "Sorry, no ad is available at this moment.",
     "error": "Oh no, something went wrong!",
     "errorstore": "Store error, try again later.",
+    "purchasing": "Purchasing...",
     "purchased": "Thanks for making this purchase.",
     "thanks": "Thanks!",
     "touchToStart": "Touch to start",
@@ -36,5 +38,7 @@
     "highscore": "New highscore!",
     "high_score": "High Score",
     "share": "Share",
-    "moreGames": "More games"
+    "moreGames": "More games",
+    "newVersion": "A new version is available. Do you want to download %1?",
+    "iapRemovesAd": "Any purchase removes the forced ads in-game"
 }

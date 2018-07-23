@@ -30,6 +30,7 @@
         "vinyl": "1.1.1",
         "maxrects-packer": "*",
         "fast-image-size": "*",
-        "jimp": "*"
+        "jimp": "*",
+        "lz-string": "*"
     }
 }

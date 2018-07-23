@@ -3,10 +3,12 @@
     "askLike": "Gefällt dir {TITLE}?",
     "comingsoon": "In Kürze verfügbar",
     "restore": "Einkäufe wiederherstellen",
+    "restoring": "Wiederherstellen...",
     "restored": "Ihr Kauf wurde wiederhergestellt!",
     "noAd": "Entschuldigung, es sind im Moment keine Werbungen verfügbar.",
     "error": "Oh nein, da ist etwas schief gelaufen!",
     "errorstore": "Fehler im Store, versuche es später noch einmal.",
+    "purchasing": "Erwerbe...",
     "purchased": "Danke!",
     "thanks": "Danke!",
     "touchToStart": "Berühren, um zu starten",
@@ -36,5 +38,7 @@
     "highscore": "Neuer Highscore!",
     "high_score": "Höchstpunktzahl",
     "share": "Teilen",
-    "moreGames": "Mehr Spiele"
+    "moreGames": "Mehr Spiele",
+    "newVersion": "Eine neue Version ist verfügbar. Auf Version %1 aktualisieren?",
+    "iapRemovesAd": "Jeder Kauf entfernt die erzwungene Werbung im Spiel"
 }

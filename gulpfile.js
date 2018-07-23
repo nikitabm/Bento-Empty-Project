@@ -120,6 +120,7 @@ gulp.task('build-web', [
     // 'copysprites'
     // 'sprite'
     'packAssets',
+    'compressJson',
 ], function () {
     // place code for your default task here
     var uglify = require('gulp-uglify');
@@ -147,6 +148,7 @@ gulp.task('build-cocoonjs', [
     'uglify',
     'cordovaReplace',
     'packAssets',
+    'compressJson',
     // 'copysprites',
     /*'sprite',*/
     'restore-audio',
@@ -752,7 +754,35 @@ gulp.task('packAssets', ['copy'], function (onComplete) {
     });
 });
 
-gulp.task('compressJson', [], function () {});
+gulp.task('compressJson', ['packAssets'], function (onComplete) {
+    // enumerate
+    var lzString = require('lz-string');
+    var fs = require('fs');
+    var onFile = function () {};
+    var walkSync = function (currentDirPath, callback) {
+        fs.readdir(currentDirPath, function (err, files) {
+            if (err) {
+                throw new Error(err);
+            }
+            files.forEach(function (name) {
+                var filePath = path.join(currentDirPath, name);
+                var stat = fs.statSync(filePath);
+                var ext = path.extname(name);
+                if (stat.isFile() && ext === '.json') {
+                    callback(filePath, stat);
+                } else if (stat.isDirectory()) {
+                    walkSync(filePath, callback);
+                }
+            });
+        });
+    };
+    walkSync(path.join('build'), function (filePath) {
+        var json = fs.readFileSync(filePath, 'utf8');
+        var compressed = lzString.compressToBase64(json);
+        fs.writeFileSync(filePath, 'LZS' + compressed);
+    });
+    onComplete();
+});
 
 gulp.task('check', function () {
     var jshint = require('gulp-jshint');

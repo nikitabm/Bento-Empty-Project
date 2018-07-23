@@ -34,6 +34,6 @@
     <engine name="ios" spec="4.5.4" />
 
     <!-- Include plugins here -->
-    
+    <plugin name="cordova-plugin-device" spec="*"/>
 
 </widget>

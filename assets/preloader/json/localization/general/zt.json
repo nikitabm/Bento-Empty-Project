@@ -3,10 +3,12 @@
     "askLike": "你喜歡{TITLE}嗎？",
     "comingsoon": "即將推出",
     "restore": "恢復購買",
+    "restoring": "正在恢復...",
     "restored": "謝謝！",
     "noAd": "對不起，目前還沒有廣告",
     "error": "哦不，什麼地方出毛病了！",
     "errorstore": "應用商店發生錯誤，請稍后再試。",
+    "purchasing": "購買中...",
     "purchased": "謝謝！",
     "thanks": "謝謝！",
     "touchToStart": "觸碰開始",
@@ -36,5 +38,7 @@
     "high_score": "開始",
     "highscore": "最新高分！",
     "share": "分享",
-    "moreGames": "更多遊戲"
+    "moreGames": "更多遊戲",
+    "newVersion": "存在新版本。下載%1嗎？",
+    "iapRemovesAd": "任何購買移除在遊戲的廣告"
 }

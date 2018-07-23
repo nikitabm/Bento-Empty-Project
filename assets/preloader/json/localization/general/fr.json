@@ -3,10 +3,12 @@
     "askLike": "Vous aimez {TITLE} ?",
     "comingsoon": "À venir",
     "restore": "Restaurer les achats",
+    "restoring": "Restauration en cours...",
     "restored": "Vos achats précédents été restaurés!",
     "noAd": "Désolés, aucune annonce disponible en ce moment.",
     "error": "Oh non, quelque chose s'est mal tourné !",
     "errorstore": "Erreur, réessayez plus tard.",
+    "purchasing": "Achat en cours...",
     "purchased": "Merci !",
     "thanks": "Merci !",
     "touchToStart": "Touchez pour commencer",
@@ -36,5 +38,7 @@
     "highscore": "Nouveau record !",
     "high_score": "Nouveau record",
     "share": "Partager",
-    "moreGames": "Autres jeux"
+    "moreGames": "Autres jeux",
+    "newVersion": "Une nouvelle version est disponible. Souhaitez-vous télécharger %1 ?",
+    "iapRemovesAd": "N'importe quel achat retire les publicités obligatoires dans le jeu"
 }

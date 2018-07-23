@@ -3,10 +3,12 @@
     "askLike": "{TITLE}お気に入りいただけましたか？",
     "comingsoon": "近日追加予定",
     "restore": "購入アイテムを復元",
+    "restoring": "復元中...",
     "restored": "ありがとう",
     "noAd": "申し訳ございません。現在広告はございません。",
     "error": "ああ、何かうまくいかなかった！",
     "errorstore": "ストアエラーは、後でもう一度ためしてください。",
+    "purchasing": "購入中…",
     "purchased": "ありがとう！",
     "thanks": "ありがとう！",
     "touchToStart": "タッチして開始",
@@ -36,5 +38,7 @@
     "highscore": "新記録！",
     "high_score": "高得点",
     "share": "シェア",
-    "moreGames": "他のゲーム"
+    "moreGames": "他のゲーム",
+    "newVersion": "新しいバージョンが利用可能です。%1 をダウンロードしますか?",
+    "iapRemovesAd": "課金アイテムを購入すると広告動画が削除されます"
 }
