@@ -109,6 +109,11 @@ window.startGame = function () {
             onResize();
         }
 
+
+        // save state setup
+        Bento.saveState.setId('EmptyProject/');
+        Bento.saveState.saveKeys = true;
+
         // setup game
         Bento.setup({
             name: 'Empty Project',
