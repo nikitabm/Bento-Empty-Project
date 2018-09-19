@@ -423,9 +423,19 @@ var deployAndroid = function (callback, signOnly) {
     var info = getXmlInfo();
     var arg3 = process.argv[3];
     // note: the path or filename may change depending on android studio sdk version
-    var apk = path.join(isWindows ? '.' : 'cordova', 'platforms', 'android', 'build', 'outputs', 'apk', 'android-release-unsigned.apk');
-    var signed = path.join(isWindows ? '.' : 'cordova', 'platforms', 'android', 'build', 'outputs', 'apk', 'signed.apk');
+    var apk = path.join(isWindows ? '.' : 'cordova', 'platforms', 'android', 'build', 'outputs', 'apk', 'release', 'android-release-unsigned.apk');
+    var signed = path.join(isWindows ? '.' : 'cordova', 'platforms', 'android', 'build', 'outputs', 'apk', 'release', 'signed.apk');
     var usedDebugKey = false;
+    var addBuildFlavor = function () {
+        var buildExtrasPath = path.join(isWindows ? '.' : 'cordova', 'platforms', 'android', 'build-extras.gradle');
+        var contents =
+            'android {\n' +
+            '    flavorDimensions "default"\n' +
+            '}';
+        if (!fs.existsSync(buildExtrasPath)) {
+            fs.writeFileSync(buildExtrasPath, contents);
+        }
+    };
     var ask = function (question, askCallback) {
         var readline = require('readline');
         var rl = readline.createInterface(process.stdin, process.stdout);
@@ -522,6 +532,8 @@ var deployAndroid = function (callback, signOnly) {
         execCordova(['build', '--release', 'android'], signOther);
     };
     var run = function () {
+        addBuildFlavor();
+        
         if (signOnly) {
             signOther();
             return;
