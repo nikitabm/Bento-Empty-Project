@@ -971,7 +971,8 @@ gulp.task('run', function (callback) {
     exec('nw ./', {}, function (error, stdout, stderr) {});
 });
 
-gulp.task('inline-assets', [], function (callback) {
+
+gulp.task('inline-assets', ['build-web'], function (callback) {
     var mimer = require('mimer');
     var lzString = require('lz-string');
     var fs = realFs;
@@ -1045,6 +1046,19 @@ gulp.task('inline-assets', [], function (callback) {
                 var convertToBase64DataUrl = function (filePath) {
                     // load file and re-save as base64
                     var file = fs.readFileSync(filePath);
+                    
+                    // JSON files might lose information if base64 conversion is used
+                    if (filePath.endsWith('.json')) {
+                        if (file[0] === 76 && file[1] === 90 && file[2] === 83) {
+                            // already base64 compressed lz-string, return as string
+                            return fs.readFileSync(filePath, 'utf-8');
+                        } else {
+                            // compress with lz string
+                            return 'LZS' + lzString.compressToBase64(fs.readFileSync(filePath, 'utf-8'));
+                        }
+                    }
+
+
                     // convert binary data to base64 encoded string
                     var base64 = new Buffer(file).toString('base64');
                     var mediaType = mimer(filePath);
@@ -1065,5 +1079,49 @@ gulp.task('inline-assets', [], function (callback) {
         });
     });
     // console.log(JSON.stringify(assetsJson, null, 2))
-    fs.writeFileSync(path.join(buildPath, 'assets.json'), JSON.stringify(assetsJson));
+    // create assets.js to save as inline assets
+    fs.writeFileSync(path.join(buildPath, 'js', 'assets.js'), 'window.assetsJson = ' + JSON.stringify(assetsJson) + ';');
+    // fs.writeFileSync(path.join(buildPath, 'assets64.json'), JSON.stringify(assetsJson));
+    callback();
+});
+gulp.task('add-assets-js', ['inline-assets'], function () {
+    var inline = require('gulp-inline');
+
+    return gulp.src([
+            './build/index.html'
+        ], {
+            base: './'
+        })
+        .pipe(plumber({
+            errorHandler: onError
+        }))
+        // simple replacement of cordova.js with assets.js
+        .pipe(replace('<script type="text/javascript" src="cordova.js"></script>', '<script src="js/assets.js"></script>'))
+        .pipe(replace('<script src="cordova.js"></script>', '<script src="js/assets.js"></script>'))
+        .pipe(gulp.dest('./'));
+});
+gulp.task('inline-html', ['add-assets-js'], function () {
+    var inline = require('gulp-inline');
+
+    return gulp.src([
+            './build/index.html'
+        ], {
+            base: './'
+        })
+        .pipe(plumber({
+            errorHandler: onError
+        }))
+        .pipe(inline())
+        .pipe(gulp.dest('./'));
+});
+gulp.task('build-compact', ['inline-assets', 'add-assets-js', 'inline-html'], function () {
+    var fs = realFs;
+    // cleanup
+    deleteFolderRecursive(path.join('build', 'js'));
+    deleteFolderRecursive(path.join('build', 'assets'));
+    deleteFolderRecursive(path.join('build', 'lib'));
+    deleteFolderRecursive(path.join('build', 'res'));
+    fs.unlinkSync(path.join('build', 'assets.json'));
+    fs.unlinkSync(path.join('build', 'package.json'));
+    fs.unlinkSync(path.join('build', 'style.css'));
 });
