@@ -162,6 +162,24 @@ document.addEventListener('deviceready', function () {
     if (navigator.isCocoonJS) {
         return;
     }
+    if (window.mraid) {
+        // playables
+        var hasStarted = false;
+        if (window.mraid.getState() === 'loading') {
+            // note: how long does mraid need for startup? if it takes long, 
+            // we should make a loading screen in an html div and remove it when loading is complete
+            window.mraid.addEventListener("ready", function () {
+                if (!hasStarted) {
+                    window.startGame();
+                    hasStarted = true;
+                }
+            });
+        } else {
+            window.startGame();
+            hasStarted = true;
+        }
+        return;
+    }
 
     if (document.createEvent) {
         event = document.createEvent("HTMLEvents");
