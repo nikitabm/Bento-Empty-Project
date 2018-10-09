@@ -140,10 +140,9 @@ bento.define('modules/localization', [
 
             // special cases for chinese tradition (zh-TW) and HK (zh-HK):
             if (
-                langLowerCase === 'zh-tw' ||
-                langLowerCase.indexOf('zh-hant') >= 0 || // taiwan
-                langLowerCase === 'zh-hk' ||
-                langLowerCase.indexOf('zh-hans') >= 0 // hongkong
+                langLowerCase === 'zh-tw' ||                // taiwan
+                langLowerCase.indexOf('zh-hant') >= 0 ||    // traditional
+                langLowerCase === 'zh-hk'                   // hongkong
             ) {
                 code = 'zt';
             }
