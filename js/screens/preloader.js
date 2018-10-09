@@ -45,8 +45,6 @@ bento.define('screens/preloader', [
         Localization.setLanguage();
     };
     var onShow = function () {
-        /* Screen starts here */
-        var viewport = Bento.getViewport();
         var loaded = false;
         var background = new Entity({
             z: 0,
