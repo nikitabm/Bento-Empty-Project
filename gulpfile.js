@@ -4,7 +4,6 @@ var gracefulFs = require('graceful-fs');
 gracefulFs.gracefulify(realFs);
 
 var gulp = require('gulp');
-var foreach = require('gulp-foreach');
 var tap = require('gulp-tap');
 var replace = require('gulp-replace');
 var plumber = require('gulp-plumber');
@@ -40,7 +39,6 @@ Utils.getKeyLength = function (obj) {
     return Object.keys(obj).length;
 };
 Utils.forEach = function (array, callback) {
-    var obj;
     var i;
     var l;
     var stop = false;
@@ -126,8 +124,8 @@ gulp.task('build-web', [
     var uglify = require('gulp-uglify');
     var usemin = require('gulp-usemin');
 
-    return gulp.src(['build/index.html'], {
-            base: './build'
+    return gulp.src(['www/index.html'], {
+            base: './www'
         })
         .pipe(plumber({
             errorHandler: onError
@@ -135,7 +133,7 @@ gulp.task('build-web', [
         .pipe(usemin({
             js: [uglify()]
         }))
-        .pipe(gulp.dest('./build/'));
+        .pipe(gulp.dest('./www/'));
 });
 gulp.task('build-cocoonjs', [
     'ogg-only',
@@ -155,12 +153,16 @@ gulp.task('build-cocoonjs', [
     'collect-assets'
 ], function () {
     var zip = require('gulp-zip');
+    var fs = realFs;
+    if (!fs.existsSync(path.join('build'))) {
+        fs.mkdirSync(path.join('build'));
+    }
 
-    return gulp.src(['build/**/*.*'], {
-            base: './build'
+    return gulp.src(['www/**/*.*'], {
+            base: './www'
         })
         .pipe(zip('build.zip'))
-        .pipe(gulp.dest('./build'));
+        .pipe(gulp.dest(path.join('.', 'build')));
 });
 gulp.task('build-cocoontest', [
     'ogg-only',
@@ -176,11 +178,16 @@ gulp.task('build-cocoontest', [
     'collect-assets'
 ], function () {
     var zip = require('gulp-zip');
-    return gulp.src(['build/**/*.*'], {
-            base: './build'
+    // make sure build folder exists
+    var fs = realFs;
+    if (!fs.existsSync(path.join('build'))) {
+        fs.mkdirSync(path.join('build'));
+    }
+    return gulp.src(['www/**/*.*'], {
+            base: './www'
         })
         .pipe(zip('build.zip'))
-        .pipe(gulp.dest('./build'));
+        .pipe(gulp.dest(path.join('.', 'build')));
 
 });
 gulp.task('watch', ['build-cocoontest'], function () {
@@ -210,7 +217,6 @@ gulp.task('collectLoop', [], function () {
         '!assets/**/*.tmx',
         '!assets/**/*.tsx'
     ].concat(audioFormats);
-    var i;
 
     // reset jsons
     jsons = {};
@@ -290,8 +296,6 @@ gulp.task('collectLoop', [], function () {
 });
 gulp.task('collect-assets', ['collectLoop'], function () {
     // write out json files
-    var isWin = (os.platform() === 'win32'),
-        slash = isWin ? '\\' : '/';
     var json;
     var jsonfile = require('jsonfile');
     var jeditor = require("gulp-json-editor");
@@ -336,7 +340,7 @@ gulp.task('collector', ['collect-assets'], function () {
 // build steps
 gulp.task('clean', ['collect-assets'], function () {
     var clean = require('gulp-clean');
-    return gulp.src('build', {
+    return gulp.src('www', {
             read: false
         }).pipe(plumber({
             errorHandler: onError
@@ -369,7 +373,7 @@ gulp.task('copy', ['clean'], function () {
         .pipe(plumber({
             errorHandler: onError
         }))
-        .pipe(gulp.dest('./build'));
+        .pipe(gulp.dest('./www'));
 });
 gulp.task('ogg-only', [], function () {
     // for cocoon builds, ogg is enough
@@ -395,7 +399,7 @@ gulp.task('copysprites', ['clean', 'copy'], function () {
         .pipe(plumber({
             errorHandler: onError
         }))
-        .pipe(gulp.dest('./build'));
+        .pipe(gulp.dest('./www'));
 });
 gulp.task('concat', ['copy'], function () {
     // concats all js files into game.js
@@ -405,19 +409,19 @@ gulp.task('concat', ['copy'], function () {
         ])
         // output
         .pipe(concat('game.js'))
-        .pipe(gulp.dest('build/js'));
+        .pipe(gulp.dest('www/js'));
 });
 gulp.task('copyJs', ['clean', 'copy'], function () {
     // copy without concatting
     return gulp.src([
             'js/**/*.js'
         ])
-        .pipe(gulp.dest('build/js'));
+        .pipe(gulp.dest('www/js'));
 });
 gulp.task('cordovaReplace', ['clean', 'copy'], function () {
     // insert cordova.js
     return gulp.src([
-            './build/index.html'
+            './www/index.html'
         ], {
             base: './'
         })
@@ -431,7 +435,7 @@ gulp.task('replace', ['copyJs'], function () {
     var xmlInfo = getXmlInfo();
     // replace specific strings
     return gulp.src([
-            './build/js/**/*.js'
+            './www/js/**/*.js'
         ], {
             base: './'
         })
@@ -444,8 +448,8 @@ gulp.task('replace', ['copyJs'], function () {
 gulp.task('replaceDev', ['replace'], function () {
     // replace specific strings
     return gulp.src([
-            './build/js/game.js',
-            './build/js/utils.js'
+            './www/js/game.js',
+            './www/js/utils.js'
         ], {
             base: './'
         })
@@ -458,7 +462,7 @@ gulp.task('replaceDev', ['replace'], function () {
 gulp.task('uglify', ['replace', 'replaceDev'], function () {
     var uglify = require('gulp-uglify');
     return gulp.src([
-            './build/js/**/*.js'
+            './www/js/**/*.js'
         ], {
             base: './'
         })
@@ -486,8 +490,7 @@ gulp.task('getJSON', ['copy'], function () {
         //     //console.log(currentFile);
         // }))
         .pipe(jeditor(function (file) {
-            var i, image, name;
-            var images = [];
+            var image, name;
             var group;
 
             // go through all asset groups and init .images and .texturePacker
@@ -515,7 +518,7 @@ gulp.task('getJSON', ['copy'], function () {
             }
             return spriteJsons; // must return JSON object.
         }))
-        .pipe(gulp.dest('./build/'));
+        .pipe(gulp.dest('./www/'));
 });
 /**
  * Pack assets according to the settings of each asset group
@@ -526,7 +529,7 @@ gulp.task('packAssets', ['copy'], function (onComplete) {
     var Jimp = require("jimp");
     var imageSize = require('fast-image-size');
     var MaxRectsPacker = require("maxrects-packer");
-    var buildPath = 'build';
+    var buildPath = 'www';
     var assetsJson = fs.readFileSync(path.join(buildPath, 'assets.json'), 'utf8');
     var spriteSheetJsons = {};
     // prepare for async tasks
@@ -565,13 +568,13 @@ gulp.task('packAssets', ['copy'], function (onComplete) {
             Utils.forEach(packer.bins, function (bin, i) {
                 // new image for each bin
                 tasks.add();
-                var img = new Jimp(bin.width, bin.height, function (err, image) {
+                new Jimp(bin.width, bin.height, function (err, image) {
                     Utils.forEach(bin.rects, function (rect) {
                         // paste the image according to the rect
                         var x = rect.x;
                         var y = rect.y;
-                        var width = rect.width;
-                        var height = rect.height;
+                        // var width = rect.width;
+                        // var height = rect.height;
                         var data = rect.data;
                         var subImage = jimpImages[data.imagePath];
                         image.blit(subImage, x, y);
@@ -651,7 +654,7 @@ gulp.task('packAssets', ['copy'], function (onComplete) {
         });
     };
     var packJson = function (assetGroup, assetGroupName) {
-        var basePath = assetGroup.path;
+        // var basePath = assetGroup.path;
         var assetJsons = assetGroup.json;
         var outputJson = {};
 
@@ -684,7 +687,7 @@ gulp.task('packAssets', ['copy'], function (onComplete) {
         });
     };
     var packSpriteSheetFull = function (assetGroup, assetGroupName) {
-        var basePath = assetGroup.path;
+        // var basePath = assetGroup.path;
         var spritesheets = assetGroup.spritesheets;
 
         if (!spritesheets) {
@@ -701,9 +704,9 @@ gulp.task('packAssets', ['copy'], function (onComplete) {
         });
         packImages(assetGroup, assetGroupName, 'spritesheets');
     };
-    var packSpriteSheetFolder = function (assetGroup, assetGroupName) {
-        // TODO
-        /*var basePath = assetGroup.path;
+    // TODO
+    /*var packSpriteSheetFolder = function (assetGroup, assetGroupName) {
+        var basePath = assetGroup.path;
         var spriteSheets = assetGroup.spritesheets;
         var folders = {};
 
@@ -726,9 +729,8 @@ gulp.task('packAssets', ['copy'], function (onComplete) {
         // loop through folders and create packs
         Utils.forEach(folders, function (folder, folderName) {
             
-        });*/
-    };
-
+        });
+    };*/
     // parse json after reading
     assetsJson = JSON.parse(assetsJson);
 
@@ -758,7 +760,6 @@ gulp.task('compressJson', ['packAssets'], function (onComplete) {
     // enumerate
     var lzString = require('lz-string');
     var fs = require('fs');
-    var onFile = function () {};
     var walkSync = function (currentDirPath, callback) {
         fs.readdir(currentDirPath, function (err, files) {
             if (err) {
@@ -776,7 +777,7 @@ gulp.task('compressJson', ['packAssets'], function (onComplete) {
             });
         });
     };
-    walkSync(path.join('build'), function (filePath) {
+    walkSync(path.join('www'), function (filePath) {
         var json = fs.readFileSync(filePath, 'utf8');
         var compressed = lzString.compressToBase64(json);
         fs.writeFileSync(filePath, 'LZS' + compressed);
@@ -804,7 +805,7 @@ var getXmlInfo = function () {
     // note: parsing might be better with the etree node module
     var xml;
     var info = {};
-    var start, end, length;
+    var start, end;
     var fs = require('fs');
     // read config.xml from root folder
     xml = fs.readFileSync(path.join('config.xml'), 'utf-8');
@@ -951,7 +952,7 @@ gulp.task('subset', function () {
 gulp.task('build-desktop', ['ogg-only', 'build-web', 'restore-audio'], function (callback) {
     var NwBuilder = require('nw-builder');
     var nw = new NwBuilder({
-        files: './build/**/**', // use the glob format
+        files: './www/**/**', // use the glob format
         platforms: ['osx64' /*, 'win32', 'win64'*/ ],
         buildDir: './app',
         macIcns: 'misc/icon.icns',
@@ -977,7 +978,7 @@ gulp.task('inline-assets', ['build-web'], function (callback) {
     var lzString = require('lz-string');
     var fs = realFs;
     // read assets from assets.json
-    var buildPath = 'build';
+    var buildPath = 'www';
     var assetsJsonStr = fs.readFileSync(path.join(buildPath, 'assets.json'), 'utf8');
     var isCompressed = false;
     var assetsJsonDec;
@@ -1046,7 +1047,7 @@ gulp.task('inline-assets', ['build-web'], function (callback) {
                 var convertToBase64DataUrl = function (filePath) {
                     // load file and re-save as base64
                     var file = fs.readFileSync(filePath);
-                    
+
                     // JSON files might lose information if base64 conversion is used
                     if (filePath.endsWith('.json')) {
                         if (file[0] === 76 && file[1] === 90 && file[2] === 83) {
@@ -1085,10 +1086,8 @@ gulp.task('inline-assets', ['build-web'], function (callback) {
     callback();
 });
 gulp.task('add-assets-js', ['inline-assets'], function () {
-    var inline = require('gulp-inline');
-
     return gulp.src([
-            './build/index.html'
+            './www/index.html'
         ], {
             base: './'
         })
@@ -1104,7 +1103,7 @@ gulp.task('inline-html', ['add-assets-js'], function () {
     var inline = require('gulp-inline');
 
     return gulp.src([
-            './build/index.html'
+            './www/index.html'
         ], {
             base: './'
         })
@@ -1117,11 +1116,11 @@ gulp.task('inline-html', ['add-assets-js'], function () {
 gulp.task('build-compact', ['inline-assets', 'add-assets-js', 'inline-html'], function () {
     var fs = realFs;
     // cleanup
-    deleteFolderRecursive(path.join('build', 'js'));
-    deleteFolderRecursive(path.join('build', 'assets'));
-    deleteFolderRecursive(path.join('build', 'lib'));
-    deleteFolderRecursive(path.join('build', 'res'));
-    fs.unlinkSync(path.join('build', 'assets.json'));
-    fs.unlinkSync(path.join('build', 'package.json'));
-    fs.unlinkSync(path.join('build', 'style.css'));
+    deleteFolderRecursive(path.join('www', 'js'));
+    deleteFolderRecursive(path.join('www', 'assets'));
+    deleteFolderRecursive(path.join('www', 'lib'));
+    deleteFolderRecursive(path.join('www', 'res'));
+    fs.unlinkSync(path.join('www', 'assets.json'));
+    fs.unlinkSync(path.join('www', 'package.json'));
+    fs.unlinkSync(path.join('www', 'style.css'));
 });

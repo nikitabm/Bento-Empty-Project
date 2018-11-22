@@ -33,6 +33,10 @@
     <engine name="android" spec="6.4.0" />
     <engine name="ios" spec="4.5.4" />
 
+    <!-- Settings -->
+    <preference name="Orientation" value="portrait"/>
+    <preference name="Fullscreen" value="true"/>
+
     <!-- Include plugins here -->
     <plugin name="cordova-plugin-device" spec="*"/>
 

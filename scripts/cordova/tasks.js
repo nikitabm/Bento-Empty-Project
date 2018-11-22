@@ -66,7 +66,7 @@ var deleteFolderRecursive = function (source) {
 var isWindows = /^win/.test(process.platform);
 var execCordova = function (args, onComplete) {
     var task = spawn('cordova' + (isWindows ? '.cmd' : ''), args, {
-        cwd: isWindows ? path.join('.') : path.join('cordova'),
+        // cwd: isWindows ? path.join('.') : path.join('cordova'),
         stdio: "inherit"
     });
     task.on('exit', function (code) {
@@ -99,69 +99,48 @@ var execCommand = function (cmd, args, onComplete) {
  * Adds plugin from local folder
  * Seems execCordova can't be used to install local plugins
  */
-var pluginAdd = function (path, onComplete) {
-    // for some reason editing config.xml or using spawn is not working while gulp is running?
-    exec('cordova plugin add "' + path + '" --save', {
-        cwd: 'cordova'
-    }, function (error, stdout, stderr) {
-        // log output
-        console.log(stdout);
-        console.error(stderr);
+// var pluginAdd = function (path, onComplete) {
+//     // for some reason editing config.xml or using spawn is not working while gulp is running?
+//     exec('cordova plugin add "' + path + '" --save', {
+//         cwd: 'cordova'
+//     }, function (error, stdout, stderr) {
+//         // log output
+//         console.log(stdout);
+//         console.error(stderr);
 
-        if (error) {
-            console.log('Error:' + error.toString());
-            return;
-        }
-        if (onComplete) {
-            onComplete();
-        }
-    });
-};
+//         if (error) {
+//             console.log('Error:' + error.toString());
+//             return;
+//         }
+//         if (onComplete) {
+//             onComplete();
+//         }
+//     });
+// };
 /**
  * Copy build folder to www folder
  */
-var copyBuildToWww = function () {
-    console.log('Copy build folder to www');
-    deleteFolderRecursive(path.join('cordova', 'www'));
-    //
-    copyFolderRecursiveSync(
-        path.join('build'),
-        path.join('cordova')
-    );
-    fs.renameSync(path.join('cordova', 'build'), path.join('cordova', 'www'));
-
-    // remove build.zip
-    if (fs.existsSync(path.join('cordova', 'www', 'build.zip'))) {
-        console.log('Removing build.zip');
-        fs.unlinkSync(path.join('cordova', 'www', 'build.zip'));
-    }
-    // remove res folder
-    if (fs.existsSync(path.join('cordova', 'www', 'res'))) {
-        console.log('Removing res folder');
-        deleteFolderRecursive(path.join('cordova', 'www', 'res'));
-    }
-};
 var copyBuildToIosWww = function () {
     console.log('Copy build to ios www');
     // copies build directly to platform www
-    if (fs.existsSync(path.join('cordova', 'platforms', 'ios'))) {
-        // delete js folders for any leftover cdf file
-        deleteFolderRecursive(path.join('cordova', 'platforms', 'ios', 'www', 'js'));
+    if (fs.existsSync(path.join('platforms', 'ios'))) {
+        // delete js folders
+        deleteFolderRecursive(path.join('platforms', 'ios', 'www', 'js'));
         copyFolderRecursiveSync(
-            path.join('cordova', 'www'),
-            path.join('cordova', 'platforms', 'ios')
+            path.join('www'),
+            path.join('platforms', 'ios')
         );
     }
 };
 var copyBuildToAndroidWww = function () {
     console.log('Copy build to android www');
     // copies build directly to platform www
-    if (fs.existsSync(path.join('cordova', 'platforms', 'android'))) {
+    if (fs.existsSync(path.join('platforms', 'android'))) {
         // delete js folders for any leftover cdf file
-        deleteFolderRecursive(path.join('cordova', 'platforms', 'android', 'assets', 'www', 'js'));
+        deleteFolderRecursive(path.join('platforms', 'android', 'assets', 'www', 'js'));
         copyFolderRecursiveSync(
-            path.join('cordova', 'www'),
-            path.join('cordova', 'platforms', 'android', 'assets')
+            path.join('www'),
+            path.join('platforms', 'android', 'assets')
         );
     }
 };
@@ -173,9 +152,9 @@ var getXmlInfo = function () {
     // note: parsing might be better with the etree node module
     var xml;
     var info = {};
-    var start, end, length;
+    var start, end;
     // read config.xml from root folder
-    xml = fs.readFileSync(path.join('cordova', 'config.xml'), 'utf-8');
+    xml = fs.readFileSync(path.join('config.xml'), 'utf-8');
 
     // parse name
     start = xml.indexOf('<name>');
@@ -214,38 +193,7 @@ var getXmlInfo = function () {
 
     return info;
 };
-/**
- * Copy res folder
- */
-var copyResFolder = function () {
-    console.log('Copy res folder to cordova');
-    copyFolderRecursiveSync(
-        path.join('res'),
-        path.join('cordova')
-    );
-};
-var updateConfigXml = function () {
-    var xml;
 
-    // read config.xml from root folder
-    xml = fs.readFileSync(path.join(isWindows ? '..' : '.', 'config.xml'), 'utf-8');
-
-    // windows: replace ../cordova-plugins with ../../cordova-plugins
-    // and ./scripts with ./../scripts
-    if (isWindows) {
-        xml = xml.replace(
-            /\.\/scripts/g,
-            './../scripts'
-        );
-        xml = xml.replace(
-            /\.\.\/cordova\-plugins/g,
-            '../../cordova-plugins'
-        );
-    }
-
-    console.log('Write new config.xml');
-    fs.writeFileSync(path.join(isWindows ? '.' : 'cordova', 'config.xml'), xml);
-};
 /**
  * Installs the game with the version and build number corresponding to the one in config.xml.
  * When install is finished, the game is automatically started
@@ -253,12 +201,12 @@ var updateConfigXml = function () {
 var installAndroid = function (onComplete) {
     var info = getXmlInfo();
     var fileName = info.name.replace(/\s+/g, '') + 'V' + info.version + '-' + info.build + '.apk';
-    var filePath = path.join('cordova', 'build-deployment', fileName);
+    var filePath = path.join('build', fileName);
 
     if (!fs.existsSync(filePath)) {
         // try again with debug
         var fileDebug = info.name.replace(/\s+/g, '') + 'V' + info.version + '-' + info.build + '-debug.apk';
-        filePath = path.join('cordova', 'build-deployment', fileDebug);
+        filePath = path.join('build', fileDebug);
         if (!fs.existsSync(filePath)) {
             console.error("Could not find apk " + fileName);
             return;
@@ -327,78 +275,10 @@ var removePlugins = function (plugins, callback) {
     remove();
 };
 /**
- * build-cordova
- * Cleans up cordova folder and adds ios + android platforms
- * Removes cocoon webviews and installs them from local folder
- */
-gulp.task('build-cordova', function (callback) {
-    // add only a specific platform instead of both ios and android
-    // for example: gulp build-cordova -platform ios
-    var arg3 = process.argv[3]; // should be "-platform"
-    var arg4 = process.argv[4];
-
-    var dir = './build';
-    if (!fs.existsSync(dir)) {
-        fs.mkdirSync(dir);
-    }
-
-    // clean cordova folder
-    console.log('Cleaning cordova folder');
-    deleteFolderRecursive('cordova');
-
-    // create cordova project
-    exec('cordova create cordova', function (error, stdout, stderr) {
-        // log output
-        console.log(stdout);
-        console.error(stderr);
-
-        if (error) {
-            callback(error);
-            return;
-        }
-
-        // copy build folder
-        copyBuildToWww();
-
-        // copy res folder
-        copyResFolder();
-
-        // edit config.xml
-        if (isWindows) {
-            process.chdir('./cordova');
-        }
-        updateConfigXml();
-
-        // platform add and install webviews afterwards
-        console.log('Add platforms...');
-        if (arg3 === '-platform' && arg4) {
-            execCordova(['platform', 'add', arg4]);
-        } else {
-            execCordova(['platforms', 'add', 'ios', 'android']);
-        }
-    });
-});
-/**
  * prepare-cordova
  * Updates www folder and config.xml before running `cordova prepare`
  */
 var prepareCordova = function (callback) {
-    if (!fs.existsSync(path.join('cordova'))) {
-        console.error('ERROR: Please run `gulp build-cordova` first.');
-        return;
-    }
-    // copy build folder
-    copyBuildToWww();
-
-    // copy res folder
-    copyResFolder();
-
-    // edit config.xml
-    if (isWindows) {
-        process.chdir('./cordova');
-    }
-    updateConfigXml();
-
     // cordova prepare
     console.log('Running cordova prepare...');
     execCordova(['prepare'], callback);
@@ -421,13 +301,13 @@ gulp.task('prepare-cordova-skip-build', [], function (callback) {
  */
 var deployAndroid = function (callback, signOnly) {
     var info = getXmlInfo();
-    var arg3 = process.argv[3];
+    // var arg3 = process.argv[3];
     // note: the path or filename may change depending on android studio sdk version
-    var apk = path.join(isWindows ? '.' : 'cordova', 'platforms', 'android', 'build', 'outputs', 'apk', 'release', 'android-release-unsigned.apk');
-    var signed = path.join(isWindows ? '.' : 'cordova', 'platforms', 'android', 'build', 'outputs', 'apk', 'release', 'signed.apk');
+    var apk = path.join('platforms', 'android', 'build', 'outputs', 'apk', 'release', 'android-release-unsigned.apk');
+    var signed = path.join('platforms', 'android', 'build', 'outputs', 'apk', 'release', 'signed.apk');
     var usedDebugKey = false;
     var addBuildFlavor = function () {
-        var buildExtrasPath = path.join(isWindows ? '.' : 'cordova', 'platforms', 'android', 'build-extras.gradle');
+        var buildExtrasPath = path.join('platforms', 'android', 'build-extras.gradle');
         var contents =
             'android {\n' +
             '    flavorDimensions "default"\n' +
@@ -467,7 +347,7 @@ var deployAndroid = function (callback, signOnly) {
         });
     };
     var signOther = function () {
-        // var keystore = path.join(isWindows ? '..' : '.', 'scripts', 'cordova', 'luckykat.keystore');
+        // var keystore = path.join(isWindows ? '..' : '.', 'scripts', 'luckykat.keystore');
         ask("Path to keystore (enter debug for debug keystore): ", function (keyStorePath) {
             var keystore = keyStorePath;
             if (keystore === 'debug') {
@@ -496,23 +376,22 @@ var deployAndroid = function (callback, signOnly) {
         });
     };
     var zipalign = function () {
-        var zipAlignPath = path.join(isWindows ? '..' : '.', 'scripts', 'cordova', 'zipalign');
+        var zipAlignPath = path.join('.', 'scripts', 'cordova', 'zipalign');
         var output = path.join(
-            isWindows ? '.' : 'cordova',
-            'build-deployment',
+            'build',
             info.name.replace(/\s+/g, '') + 'V' + info.version + '-' + info.build + (usedDebugKey ? '-debug' : '') + '.apk'
         );
 
         // make sure build folder exists
-        if (!fs.existsSync(path.join(isWindows ? '.' : 'cordova', 'build-deployment'))) {
-            fs.mkdirSync(path.join(isWindows ? '.' : 'cordova', 'build-deployment'));
+        if (!fs.existsSync(path.join('build'))) {
+            fs.mkdirSync(path.join('build'));
         }
         // zipalign
         //./zipalign -v 4 input.apk input_aligned.apk
         console.log('Zipalign...');
         // execCommand(zipAlignPath + isWindows ? '.exe' : '', ['-f', /*'-v',*/ '4', signed, output]);
         if (isWindows) {
-            zipAlignPath = path.join('..', 'scripts', 'cordova', 'zipalign-win', 'zipalign.exe');
+            zipAlignPath = path.join('.', 'scripts', 'cordova', 'zipalign-win', 'zipalign.exe');
             exec(zipAlignPath + ' -f 4 ' + signed + ' ' + output, function (error, stdout, stderr) {
                 console.log(stdout);
                 if (error) {
@@ -538,26 +417,10 @@ var deployAndroid = function (callback, signOnly) {
             signOther();
             return;
         }
-        // copy build folder
-        copyBuildToWww();
-
-        // copy res folder
-        copyResFolder();
-
-        // edit config.xml
-        if (isWindows) {
-            process.chdir('./cordova');
-        }
-        updateConfigXml();
 
         // the build automatically does prepare (?)
         build();
     };
-
-    if (!fs.existsSync(path.join('cordova'))) {
-        console.error('ERROR: Please run `gulp build-cordova` first.');
-        return;
-    }
 
     run();
 };
@@ -577,15 +440,14 @@ gulp.task('sign-android', [], function (callback) {
  */
 gulp.task('deploy-ios', ['build-cocoonjs'], function (callback) {
     var info = getXmlInfo();
-    var ipa = path.join(isWindows ? '.' : 'cordova', 'platforms', 'ios', 'build', 'device', info.name + '.ipa');
+    var ipa = path.join('platforms', 'ios', 'build', 'device', info.name + '.ipa');
     var buildJson = false;
     var getBuildJson = function () {
-        if (!fs.existsSync(path.join(isWindows ? '.' : '..', 'build.json'))) {
+        if (!fs.existsSync(path.join('build.json'))) {
             console.log('build.json does not exist.');
             return;
         }
         console.log('Found build.json');
-        copyFileSync(path.join(isWindows ? '.' : '..', 'build.json'), path.join(isWindows ? '.' : 'cordova', 'build.json'));
         buildJson = true;
     };
     var build = function () {
@@ -595,14 +457,14 @@ gulp.task('deploy-ios', ['build-cocoonjs'], function (callback) {
 
         if (buildJson) {
             args.push('--buildConfig');
-            args.push(path.join(isWindows ? '.' : 'cordova', 'build.json'));
+            args.push(path.join('build.json'));
         }
 
         console.log('Build iOS...');
         execCordova(args, check);
     };
     var check = function () {
-        var output = path.join(isWindows ? '.' : 'cordova', 'build-deployment', info.name.replace(/\s+/g, '') + 'V' + info.version + '-' + info.build + '.ipa');
+        var output = path.join('build', info.name.replace(/\s+/g, '') + 'V' + info.version + '-' + info.build + '.ipa');
         // check if ipa was built
         if (!fs.existsSync(ipa)) {
             console.error('Could not find ipa');
@@ -610,34 +472,19 @@ gulp.task('deploy-ios', ['build-cocoonjs'], function (callback) {
         }
 
         // make sure build folder exists
-        if (!fs.existsSync(path.join(isWindows ? '.' : 'cordova', 'build-deployment'))) {
-            fs.mkdirSync(path.join(isWindows ? '.' : 'cordova', 'build-deployment'));
+        if (!fs.existsSync(path.join('build'))) {
+            fs.mkdirSync(path.join('build'));
         }
         console.log('Copy ipa into build folder');
 
         // copy ipa into the build folder
-        copyFileSync(ipa, path.join(isWindows ? '.' : 'cordova', 'build-deployment'));
+        copyFileSync(ipa, path.join('build'));
         fs.renameSync(
-            path.join(isWindows ? '.' : 'cordova', 'build-deployment', info.name + '.ipa'),
+            path.join('build', info.name + '.ipa'),
             output
         );
         console.log('Build saved to ' + output);
     };
-    if (!fs.existsSync(path.join('cordova'))) {
-        console.error('ERROR: Please run `gulp build-cordova` first.');
-        return;
-    }
-    // copy build folder
-    copyBuildToWww();
-
-    // copy res folder
-    copyResFolder();
-
-    // edit config.xml
-    if (isWindows) {
-        process.chdir('./cordova');
-    }
-    updateConfigXml();
 
     // cordova prepare
     console.log('Running cordova prepare...');
@@ -649,12 +496,12 @@ gulp.task('deploy-ios', ['build-cocoonjs'], function (callback) {
 gulp.task('install-android', [], function () {
     var info = getXmlInfo();
     var fileName = info.name.replace(/\s+/g, '') + 'V' + info.version + '-' + info.build + '.apk';
-    var filePath = path.join('cordova', 'build-deployment', fileName);
+    var filePath = path.join('build', fileName);
 
     if (!fs.existsSync(filePath)) {
         // try again with debug
         var fileDebug = info.name.replace(/\s+/g, '') + 'V' + info.version + '-' + info.build + '-debug.apk';
-        filePath = path.join('cordova', 'build-deployment', fileDebug);
+        filePath = path.join('build', fileDebug);
         if (!fs.existsSync(filePath)) {
             console.error("Could not find apk " + fileName);
             return;
@@ -672,7 +519,6 @@ gulp.task('run-android', [], function () {
  * Copy a test build to cordova projects
  */
 gulp.task('copy-www-cordova', ['build-cocoontest'], function (callback) {
-    copyBuildToWww();
 
     // copy www to ios/www
     copyBuildToIosWww();
@@ -698,7 +544,6 @@ gulp.task('watch-cordova', ['copy-www-cordova'], function () {
  * Copy a cocoonjs build to cordova projects
  */
 gulp.task('update-build', ['build-cocoonjs'], function (callback) {
-    copyBuildToWww();
 
     // copy www to ios/www
     copyBuildToIosWww();
@@ -720,7 +565,7 @@ gulp.task('reinstall-plugins', function (callback) {
         });
     };
 
-    plugins = getDirectories(path.join('cordova', 'plugins'));
+    plugins = getDirectories(path.join('plugins'));
 
     // format for inquirer checkbox
     choices = (function () {
@@ -765,14 +610,14 @@ gulp.task('copyJs-quick', [], function () {
     return gulp.src([
             'js/**/*.js'
         ])
-        .pipe(gulp.dest('build/js'));
+        .pipe(gulp.dest('www/js'));
 });
 gulp.task('replace-quick', ['copyJs-quick'], function () {
     var replace = require('gulp-replace');
     var xmlInfo = getXmlInfo();
     // replace specific strings
     return gulp.src([
-            './build/js/**/*.js'
+            './www/js/**/*.js'
         ], {
             base: './'
         })
@@ -783,7 +628,6 @@ gulp.task('replace-quick', ['copyJs-quick'], function () {
         .pipe(gulp.dest('./'));
 });
 gulp.task('update-build-js', ['replace-quick'], function (callback) {
-    copyBuildToWww();
 
     // copy www to ios/www
     copyBuildToIosWww();
@@ -805,8 +649,8 @@ gulp.task('build-js', [
     'replace-quick',
 ], function () {
     var zip = require('gulp-zip');
-    return gulp.src(['build/**/*.*'], {
-            base: './build'
+    return gulp.src(['www/**/*.*'], {
+            base: './www'
         })
         .pipe(zip('build.zip'))
         .pipe(gulp.dest('./build'));

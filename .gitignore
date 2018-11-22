@@ -2,4 +2,8 @@
 /cordova/
 /build/
 /node_modules/
+/www/
+/platforms/
+/plugins/
 *.log
+build.zip
