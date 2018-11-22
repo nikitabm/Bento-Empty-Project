@@ -125,6 +125,8 @@ window.startGame = function () {
             pixelSize: pixelSize,
             antiAlias: antiAlias,
             manualResize: (renderer === 'canvas2d') ? true : false,
+            useDeltaT: false,
+            autoThrottle: false,
             subPixel: true,
             preventContextMenu: true,
             reload: {
