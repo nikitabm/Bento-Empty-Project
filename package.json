@@ -31,6 +31,8 @@
         "maxrects-packer": "*",
         "fast-image-size": "*",
         "jimp": "*",
+        "gulp-inline": "*",
+        "mimer": "*",
         "lz-string": "*"
     }
 }

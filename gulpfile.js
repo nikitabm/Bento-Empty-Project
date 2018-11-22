@@ -970,3 +970,158 @@ gulp.task('build-desktop', ['ogg-only', 'build-web', 'restore-audio'], function 
 gulp.task('run', function (callback) {
     exec('nw ./', {}, function (error, stdout, stderr) {});
 });
+
+
+gulp.task('inline-assets', ['build-web'], function (callback) {
+    var mimer = require('mimer');
+    var lzString = require('lz-string');
+    var fs = realFs;
+    // read assets from assets.json
+    var buildPath = 'build';
+    var assetsJsonStr = fs.readFileSync(path.join(buildPath, 'assets.json'), 'utf8');
+    var isCompressed = false;
+    var assetsJsonDec;
+    var assetsJson;
+    // trim header
+    if (assetsJsonStr[0] === 'L' && assetsJsonStr[1] === 'Z' && assetsJsonStr[2] === 'S') {
+        isCompressed = true;
+        // trim header
+        assetsJsonStr = assetsJsonStr.substring(3);
+    }
+
+    // decompress assetsjson and parse
+    if (isCompressed) {
+        assetsJsonDec = lzString.decompressFromBase64(assetsJsonStr);
+        assetsJson = JSON.parse(assetsJsonDec);
+    } else {
+        assetsJson = JSON.parse(assetsJsonStr);
+    }
+
+    // loop through asset groups
+    Utils.forEach(assetsJson, function (assetGroup, assetGroupName) {
+        var groupPath = assetGroup.path;
+        assetGroup.path = 'base64'; // remove path and indicate base64 assets
+
+        // loop inside asset groups
+        Utils.forEach(assetGroup, function (assets, assetType) {
+            if (assets === assetGroup.path) {
+                // ignore the path key
+                return;
+            }
+
+            // asset items may be paths or array of paths
+            Utils.forEach(assets, function (assetData, assetKey) {
+                var findFile = function (assetPath) {
+                    var fullPath = path.join(buildPath, groupPath, assetType, assetPath);
+                    var fullPathJson = fullPath + '.json';
+                    var fullPathPng = fullPath + '.png';
+
+                    if (fs.existsSync(fullPath)) {
+                        assetToBase64(fullPath);
+                    } else {
+                        // the path may be missing .png or .json at the end (spritesheets & packed-images)
+                        if (fs.existsSync(fullPathJson) && fs.existsSync(fullPathPng)) {
+                            assetToBase64(fullPathJson, fullPathPng);
+                        } else {
+                            // ???
+                        }
+                    }
+                };
+                var assetToBase64 = function (filePath1, filePath2) {
+                    var file1;
+                    var file2;
+                    if (filePath1 && filePath2) {
+                        // convert both, assume 1 is json, 2 is png
+                        file1 = convertToBase64DataUrl(filePath1);
+                        file2 = convertToBase64DataUrl(filePath2);
+                        assets[assetKey] = {
+                            json: file1,
+                            png: file2
+                        };
+                    } else {
+                        assets[assetKey] = convertToBase64DataUrl(filePath1);
+                    }
+
+                };
+                var convertToBase64DataUrl = function (filePath) {
+                    // load file and re-save as base64
+                    var file = fs.readFileSync(filePath);
+                    
+                    // JSON files might lose information if base64 conversion is used
+                    if (filePath.endsWith('.json')) {
+                        if (file[0] === 76 && file[1] === 90 && file[2] === 83) {
+                            // already base64 compressed lz-string, return as string
+                            return fs.readFileSync(filePath, 'utf-8');
+                        } else {
+                            // compress with lz string
+                            return 'LZS' + lzString.compressToBase64(fs.readFileSync(filePath, 'utf-8'));
+                        }
+                    }
+
+
+                    // convert binary data to base64 encoded string
+                    var base64 = new Buffer(file).toString('base64');
+                    var mediaType = mimer(filePath);
+                    var dataUrl = 'data:' + mediaType + ';base64,' + base64;
+                    return dataUrl;
+                };
+                // load assets and resave as base64
+                if (Array.isArray(assetData) && assetData.length > 0) {
+                    // audio is split as array of paths
+                    // since it's pointless to convert all types, we convert only the first
+                    findFile(assetData[0]);
+                    return;
+                } else {
+                    // assume assetData is the path
+                    findFile(assetData);
+                }
+            });
+        });
+    });
+    // console.log(JSON.stringify(assetsJson, null, 2))
+    // create assets.js to save as inline assets
+    fs.writeFileSync(path.join(buildPath, 'js', 'assets.js'), 'window.assetsJson = ' + JSON.stringify(assetsJson) + ';');
+    // fs.writeFileSync(path.join(buildPath, 'assets64.json'), JSON.stringify(assetsJson));
+    callback();
+});
+gulp.task('add-assets-js', ['inline-assets'], function () {
+    var inline = require('gulp-inline');
+
+    return gulp.src([
+            './build/index.html'
+        ], {
+            base: './'
+        })
+        .pipe(plumber({
+            errorHandler: onError
+        }))
+        // simple replacement of cordova.js with assets.js
+        .pipe(replace('<script type="text/javascript" src="cordova.js"></script>', '<script src="js/assets.js"></script>'))
+        .pipe(replace('<script src="cordova.js"></script>', '<script src="js/assets.js"></script>'))
+        .pipe(gulp.dest('./'));
+});
+gulp.task('inline-html', ['add-assets-js'], function () {
+    var inline = require('gulp-inline');
+
+    return gulp.src([
+            './build/index.html'
+        ], {
+            base: './'
+        })
+        .pipe(plumber({
+            errorHandler: onError
+        }))
+        .pipe(inline())
+        .pipe(gulp.dest('./'));
+});
+gulp.task('build-compact', ['inline-assets', 'add-assets-js', 'inline-html'], function () {
+    var fs = realFs;
+    // cleanup
+    deleteFolderRecursive(path.join('build', 'js'));
+    deleteFolderRecursive(path.join('build', 'assets'));
+    deleteFolderRecursive(path.join('build', 'lib'));
+    deleteFolderRecursive(path.join('build', 'res'));
+    fs.unlinkSync(path.join('build', 'assets.json'));
+    fs.unlinkSync(path.join('build', 'package.json'));
+    fs.unlinkSync(path.join('build', 'style.css'));
+});

@@ -34,6 +34,7 @@ window.startGame = function () {
     ) {
         // for 'pixi', include pixi.js manually in index.html
         var renderer = 'canvas2d';
+        var antiAlias = false;
 
         // set up a dynamic resolution, e.g. 180~240 x 320
         var landscape = false;
@@ -43,7 +44,7 @@ window.startGame = function () {
         // we lock the width by setting min and max the same
         var minHeight = 320;
         var maxHeight = 320; 
-        var pixelSize = 3; // we triple pixelSize, which means the
+        var pixelSize = 3; // we triple pixelSize, which means the internal resolution is tripled
 
         var canvasDimension = new AutoResize(baseSize, minHeight, maxHeight, landscape);
 
@@ -92,23 +93,24 @@ window.startGame = function () {
             }
 
             // prevent the canvas being blurry after resizing
-            if (context.imageSmoothingEnabled) {
-                context.imageSmoothingEnabled = false;
-            }
-            if (context.webkitImageSmoothingEnabled) {
-                context.webkitImageSmoothingEnabled = false;
-            }
-            if (context.mozImageSmoothingEnabled) {
-                context.mozImageSmoothingEnabled = false;
-            }
-            if (context.msImageSmoothingEnabled) {
-                context.msImageSmoothingEnabled = false;
+            if (!antiAlias) {
+                if (context.imageSmoothingEnabled) {
+                    context.imageSmoothingEnabled = false;
+                }
+                if (context.webkitImageSmoothingEnabled) {
+                    context.webkitImageSmoothingEnabled = false;
+                }
+                if (context.mozImageSmoothingEnabled) {
+                    context.mozImageSmoothingEnabled = false;
+                }
+                if (context.msImageSmoothingEnabled) {
+                    context.msImageSmoothingEnabled = false;
+                }
             }
         };
         if (renderer === 'canvas2d') {
             onResize();
         }
-
 
         // save state setup
         Bento.saveState.setId('EmptyProject/');
@@ -121,7 +123,10 @@ window.startGame = function () {
             canvasDimension: canvasDimension,
             renderer: renderer,
             pixelSize: pixelSize,
+            antiAlias: antiAlias,
             manualResize: (renderer === 'canvas2d') ? true : false,
+            useDeltaT: false,
+            autoThrottle: false,
             subPixel: true,
             preventContextMenu: true,
             reload: {
@@ -157,6 +162,24 @@ document.addEventListener('deviceready', function () {
     var event;
 
     if (navigator.isCocoonJS) {
+        return;
+    }
+    if (window.mraid) {
+        // playables
+        var hasStarted = false;
+        if (window.mraid.getState() === 'loading') {
+            // note: how long does mraid need for startup? if it takes long, 
+            // we should make a loading screen in an html div and remove it when loading is complete
+            window.mraid.addEventListener("ready", function () {
+                if (!hasStarted) {
+                    window.startGame();
+                    hasStarted = true;
+                }
+            });
+        } else {
+            window.startGame();
+            hasStarted = true;
+        }
         return;
     }
 
