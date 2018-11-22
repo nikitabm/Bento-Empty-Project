@@ -355,16 +355,11 @@ gulp.task('copy', ['clean'], function () {
         'assets/**/*.json',
         'assets/**/*.png',
         'assets/**/*.ttf',
-        // '!./assets/**/images/**/*', // ignore images for texture packer
-        './res/**/*',
         './lib/**/*',
         './index.html',
-        './crosspromo/**/*',
         './assets.json',
         './style.css',
-        './package.json',
-        './google-services.json',
-        './GoogleService-Info.plist'
+        './package.json'
     ].concat(audioFormats);
 
     return gulp.src(src, {
