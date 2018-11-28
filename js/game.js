@@ -53,11 +53,8 @@ window.startGame = function () {
             var viewport = Bento.getViewport();
             var canvas = document.getElementById('canvas');
             var context;
+            var pixiRenderer;
 
-            if (renderer !== 'canvas2d') {
-                // responsive resizing only works for canvas2d for now
-                return;
-            }
             if (!canvas) {
                 return;
             }
@@ -92,25 +89,17 @@ window.startGame = function () {
                 Bento.input.updateCanvas();
             }
 
-            // prevent the canvas being blurry after resizing
-            if (!antiAlias) {
-                if (context.imageSmoothingEnabled) {
-                    context.imageSmoothingEnabled = false;
-                }
-                if (context.webkitImageSmoothingEnabled) {
-                    context.webkitImageSmoothingEnabled = false;
-                }
-                if (context.mozImageSmoothingEnabled) {
-                    context.mozImageSmoothingEnabled = false;
-                }
-                if (context.msImageSmoothingEnabled) {
-                    context.msImageSmoothingEnabled = false;
+            if (renderer === 'pixi') {
+                // use the resize function on pixi
+                pixiRenderer = Bento.getRenderer().getPixiRenderer();
+                pixiRenderer.resize(canvas.width, canvas.height);
+            } else if (renderer === 'canvas2d') {
+                // prevent the canvas being blurry after resizing
+                if (Bento.getAntiAlias() === false) {
+                    Bento.setAntiAlias(false);
                 }
             }
         };
-        if (renderer === 'canvas2d') {
-            onResize();
-        }
 
         // save state setup
         Bento.saveState.setId('EmptyProject/');
@@ -145,6 +134,9 @@ window.startGame = function () {
                 window.addEventListener('resize', onResize, false);
                 window.addEventListener('orientationchange', onResize, false);
             }
+            // fit screen
+            onResize();
+            // continue to init
             Init();
         });
     });
