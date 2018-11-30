@@ -1,6 +1,6 @@
 var gulp = require('gulp');
 
-gulp.task('default', function () {
+gulp.task('default', function (done) {
     var inquirer = require('inquirer');
     var exitStr = 'Exit';
 
@@ -31,11 +31,13 @@ gulp.task('default', function () {
             } else if (answers.question === strings.cordova) {
                 askCordova();
             } else if (answers.question === strings.collectAssets) {
-                gulp.start('collect-assets');
+                gulp.task('collect-assets')(done);
             } else if (answers.question === strings.watchAssets) {
-                gulp.start('collector');
+                gulp.task('collector')(done);
             } else if (answers.question === strings.subset) {
-                gulp.start('subset');
+                gulp.task('subset')(done);
+            } else {
+                done();
             }
         });
     };
@@ -61,13 +63,13 @@ gulp.task('default', function () {
             ]
         }]).then(function (answers) {
             if (answers.question === strings.cocoonJs) {
-                gulp.run('build-cocoonjs');
+                gulp.task('build-cocoonjs')(done);
             } else if (answers.question === strings.cocoonTest) {
-                gulp.run('build-cocoontest');
+                gulp.task('build-cocoontest')(done);
             } else if (answers.question === strings.web) {
-                gulp.run('build-web');
+                gulp.task('build-web')(done);
             } else if (answers.question === strings.watcher) {
-                gulp.run('watch');
+                gulp.task('watch')(done);
             }
         });
     };
@@ -104,24 +106,24 @@ gulp.task('default', function () {
         }]).then(function (answers) {
             if (answers.question === strings.newCordovaBuild) {
                 askConfirmation('WARNING: This will delete the old Cordova project. Do you want to proceed?', function () {
-                    gulp.run('build-cordova');
+                    gulp.task('build-cordova')(done);
                 }, null);
             } else if (answers.question === strings.prepareCordova) {
-                gulp.run('prepare-cordova');
+                gulp.task('prepare-cordova')(done);
             } else if (answers.question === strings.copyBuildToCordova) {
-                gulp.run('copy-www-cordova');
+                gulp.task('copy-www-cordova')(done);
             } else if (answers.question === strings.cordovaWatch) {
-                gulp.run('watch-cordova');
+                gulp.task('watch-cordova')(done);
             } else if (answers.question === strings.deployAndroid) {
-                gulp.run('deploy-android');
+                gulp.task('deploy-android')(done);
             } else if (answers.question === strings.deployIos) {
-                gulp.run('deploy-ios');
+                gulp.task('deploy-ios')(done);
             } else if (answers.question === strings.installAndroid) {
-                gulp.run('install-android');
+                gulp.task('install-android')(done);
             } else if (answers.question === strings.runAndroid) {
-                gulp.run('run-android');
+                gulp.task('run-android')(done);
             } else if (answers.question === strings.reinstallPlugins) {
-                gulp.run('reinstall-plugins');
+                gulp.task('reinstall-plugins')(done);
             }
         });
     };

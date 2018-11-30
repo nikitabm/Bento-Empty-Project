@@ -3,14 +3,6 @@ window.BUILD = 0;
 /*replace:version*/
 /*replace:build*/
 
-// undefine require
-if (window.require) {
-    window.require = undefined;
-}
-if (window.define) {
-    window.define = undefined;
-}
-
 if (bento.require.config) {
     // requirejs config
     bento.require.config({
@@ -58,7 +50,7 @@ window.startGame = function () {
         };
         console.log('********************');
         console.log('Bento v' + Bento.version);
-        console.log('Game v' + window.VERSION + 'b' + window.BUILD);
+        console.log('Game v' + window.VERSION + ' b' + window.BUILD);
         console.log('Environment: ' + getEnvironment());
         console.log('********************');
 
@@ -70,7 +62,7 @@ window.startGame = function () {
         Bento.setup({
             name: 'Empty Project',
             canvasId: 'canvas',
-            renderer: 'pixi',
+            renderer: Utils.isCocoonJs() ? 'canvas2d' : 'pixi',
             pixelSize: 3,
             antiAlias: false,
             manualResize: true,

@@ -283,15 +283,11 @@ var prepareCordova = function (callback) {
     console.log('Running cordova prepare...');
     execCordova(['prepare'], callback);
 };
-gulp.task('prepare-cordova', ['build-cocoonjs'], function (callback) {
-    prepareCordova(function () {
-        callback();
-    });
-});
-gulp.task('prepare-cordova-skip-build', [], function (callback) {
-    prepareCordova(function () {
-        callback();
-    });
+
+prepareCordova.description = "Call cordova prepare";
+gulp.task('prepare-cordova', gulp.series('build', prepareCordova));
+gulp.task('prepare-cordova-skip-build', function (callback) {
+    prepareCordova(callback);
 });
 
 /*
@@ -424,13 +420,13 @@ var deployAndroid = function (callback, signOnly) {
 
     run();
 };
-gulp.task('deploy-android', [], function (callback) {
+gulp.task('deploy-android', function (callback) {
     deployAndroid(callback, false);
 });
 /*
  * (Re-)sign the unsigned apk 
  */
-gulp.task('sign-android', [], function (callback) {
+gulp.task('sign-android', function (callback) {
     deployAndroid(callback, true);
 });
 /**
@@ -438,7 +434,7 @@ gulp.task('sign-android', [], function (callback) {
  * Generates ipa, place a build.json in the project root to specify what provisioning file to use
  * Note: It may be better to simply open the xcode project and compile from xcode.
  */
-gulp.task('deploy-ios', ['build-cocoonjs'], function (callback) {
+gulp.task('deploy-ios', function (callback) {
     var info = getXmlInfo();
     var ipa = path.join('platforms', 'ios', 'build', 'device', info.name + '.ipa');
     var buildJson = false;
@@ -493,7 +489,7 @@ gulp.task('deploy-ios', ['build-cocoonjs'], function (callback) {
 /**
  * Installs and runs latest apk to android
  */
-gulp.task('install-android', [], function () {
+gulp.task('install-android', function (done) {
     var info = getXmlInfo();
     var fileName = info.name.replace(/\s+/g, '') + 'V' + info.version + '-' + info.build + '.apk';
     var filePath = path.join('build', fileName);
@@ -507,18 +503,22 @@ gulp.task('install-android', [], function () {
             return;
         }
     }
-    installAndroid(runAndroid);
+    installAndroid(function () {
+        runAndroid();
+        done();
+    });
 });
 /**
  * Run latest apk to android
  */
-gulp.task('run-android', [], function () {
+gulp.task('run-android', function (done) {
     runAndroid();
+        done();
 });
 /**
  * Copy a test build to cordova projects
  */
-gulp.task('copy-www-cordova', ['build-cocoontest'], function (callback) {
+gulp.task('copy-www-cordova', function (callback) {
 
     // copy www to ios/www
     copyBuildToIosWww();
@@ -531,28 +531,6 @@ gulp.task('copy-www-cordova', ['build-cocoontest'], function (callback) {
 /**
  * Watch files and copy test builds to cordova
  */
-gulp.task('watch-cordova', ['copy-www-cordova'], function () {
-    gulp.watch([
-        'js/**/*.js',
-        'assets/**/*',
-        '!assets/*.json',
-        'index.html',
-        'lib/**/*.js'
-    ], ['copy-www-cordova']);
-});
-/**
- * Copy a cocoonjs build to cordova projects
- */
-gulp.task('update-build', ['build-cocoonjs'], function (callback) {
-
-    // copy www to ios/www
-    copyBuildToIosWww();
-
-    // copy www to android/assets/www
-    copyBuildToAndroidWww();
-
-    callback();
-});
 gulp.task('reinstall-plugins', function (callback) {
     var inquirer = require('inquirer');
     var plugins = [];
@@ -602,56 +580,4 @@ gulp.task('reinstall-plugins', function (callback) {
             removePlugins(answers.plugins, callback);
         }
     });
-});
-
-// update js files faster
-gulp.task('copyJs-quick', [], function () {
-    // copy without concatting
-    return gulp.src([
-            'js/**/*.js'
-        ])
-        .pipe(gulp.dest('www/js'));
-});
-gulp.task('replace-quick', ['copyJs-quick'], function () {
-    var replace = require('gulp-replace');
-    var xmlInfo = getXmlInfo();
-    // replace specific strings
-    return gulp.src([
-            './www/js/**/*.js'
-        ], {
-            base: './'
-        })
-        .pipe(replace('DEV_MODE: true', 'DEV_MODE: false'))
-        .pipe(replace(/\/\* remove\:start \*\/([\S+\n\r\s]+?)\/\* remove\:end \*\//g, ''))
-        .pipe(replace('/*replace:version*/', 'window.VERSION = "' + xmlInfo.version + '";'))
-        .pipe(replace('/*replace:build*/', 'window.BUILD = ' + xmlInfo.build + ';')) // this is android build number
-        .pipe(gulp.dest('./'));
-});
-gulp.task('update-build-js', ['replace-quick'], function (callback) {
-
-    // copy www to ios/www
-    copyBuildToIosWww();
-
-    // copy www to android/assets/www
-    copyBuildToAndroidWww();
-
-    callback();
-});
-gulp.task('watch-cordova-js', ['update-build-js'], function () {
-    gulp.watch([
-        'js/**/*.js',
-        'index.html',
-        'lib/**/*.js'
-    ], ['update-build-js']);
-});
-
-gulp.task('build-js', [
-    'replace-quick',
-], function () {
-    var zip = require('gulp-zip');
-    return gulp.src(['www/**/*.*'], {
-            base: './www'
-        })
-        .pipe(zip('build.zip'))
-        .pipe(gulp.dest('./build'));
 });
