@@ -1,3 +1,8 @@
+window.VERSION = '0.0.0';
+window.BUILD = 0;
+/*replace:version*/
+/*replace:build*/
+
 // undefine require
 if (window.require) {
     window.require = undefined;
@@ -32,85 +37,30 @@ window.startGame = function () {
         Utils,
         Init
     ) {
-        // for 'pixi', include pixi.js manually in index.html
-        var renderer = 'canvas2d';
-        var antiAlias = false;
-
-        // set up a dynamic resolution, e.g. 180~240 x 320
-        var landscape = false;
-        var baseSize = new Rectangle(0, 0, 180, 320);
-        var minWidth = 180;
-        var maxWidth = 240;
-        // we lock the width by setting min and max the same
-        var minHeight = 320;
-        var maxHeight = 320; 
-        var pixelSize = 3; // we triple pixelSize, which means the internal resolution is tripled
-
-        var canvasDimension = new AutoResize(baseSize, minHeight, maxHeight, landscape);
-
-        // responsive resize callback (useful for development)
-        var onResize = function () {
-            var viewport = Bento.getViewport();
-            var canvas = document.getElementById('canvas');
-            var context;
-
-            if (renderer !== 'canvas2d') {
-                // responsive resizing only works for canvas2d for now
-                return;
-            }
-            if (!canvas) {
-                return;
-            }
-
-            context = canvas.getContext('2d');
-            //
-            canvasDimension = new AutoResize(
-                baseSize,
-                minHeight,
-                maxHeight,
-                landscape
-            );
-            // max/min width
-            if (canvasDimension.width > maxWidth) {
-                canvasDimension.width = maxWidth;
-            }
-            if (canvasDimension.width < minWidth) {
-                canvasDimension.width = minWidth;
-            }
-
-            canvas.width = canvasDimension.width * pixelSize;
-            canvas.height = canvasDimension.height * pixelSize;
-            viewport.width = canvasDimension.width;
-            viewport.height = canvasDimension.height;
-
-            // fit to height
-            canvas.style.height = window.innerHeight + 'px';
-            canvas.style.width = (viewport.width / viewport.height * window.innerHeight) + 'px';
-
-            // Bento input updates its viewport before this event, so call this manually
-            if (Bento.input) {
-                Bento.input.updateCanvas();
-            }
-
-            // prevent the canvas being blurry after resizing
-            if (!antiAlias) {
-                if (context.imageSmoothingEnabled) {
-                    context.imageSmoothingEnabled = false;
+        var getEnvironment = function () {
+            var environment = 'Web';
+            var platform;
+            if (navigator.isCocoonJS) {
+                environment = 'Cocoon';
+                if (window.Cocoon) {
+                    environment += ' ' + platform;
                 }
-                if (context.webkitImageSmoothingEnabled) {
-                    context.webkitImageSmoothingEnabled = false;
+            } else if (window.cordova) {
+                environment = 'Cordova';
+                if (window.device) {
+                    environment += ' ' + window.device.platform;
                 }
-                if (context.mozImageSmoothingEnabled) {
-                    context.mozImageSmoothingEnabled = false;
-                }
-                if (context.msImageSmoothingEnabled) {
-                    context.msImageSmoothingEnabled = false;
-                }
+            } else if (window.FBInstant) {
+                environment = 'FBInstant';
+
             }
+            return environment;
         };
-        if (renderer === 'canvas2d') {
-            onResize();
-        }
+        console.log('********************');
+        console.log('Bento v' + Bento.version);
+        console.log('Game v' + window.VERSION + 'b' + window.BUILD);
+        console.log('Environment: ' + getEnvironment());
+        console.log('********************');
 
         // save state setup
         Bento.saveState.setId('EmptyProject/');
@@ -120,15 +70,23 @@ window.startGame = function () {
         Bento.setup({
             name: 'Empty Project',
             canvasId: 'canvas',
-            canvasDimension: canvasDimension,
-            renderer: renderer,
-            pixelSize: pixelSize,
-            antiAlias: antiAlias,
-            manualResize: (renderer === 'canvas2d') ? true : false,
+            renderer: 'pixi',
+            pixelSize: 3,
+            antiAlias: false,
+            manualResize: true,
             useDeltaT: false,
             autoThrottle: false,
             subPixel: true,
             preventContextMenu: true,
+            // canvasDimension: new Rectangle(0, 0, 640, 480), // use this if responsiveResize is false
+            responsiveResize: {
+                landscape: false,
+                minWidth: 180,
+                maxWidth: 240,
+                minHeight: 320, // minimum for iPad -> 240 x 320
+                maxHeight: 390, // will fill up for iPhoneX (ratio 19.5:9) -> 180 x 390
+            },
+            globalMouseUp: false, // recommended true for web builds
             reload: {
                 // DEV ONLY! right mouse click refreshes the current screen with new javascript code
                 simple: 'mouseDown-right',
@@ -140,11 +98,6 @@ window.startGame = function () {
             // set to false with build script
             dev: true
         }, function () {
-            // trigger responsive resize with event listeners
-            if (!Utils.isCocoonJs()) {
-                window.addEventListener('resize', onResize, false);
-                window.addEventListener('orientationchange', onResize, false);
-            }
             Init();
         });
     });
@@ -155,17 +108,19 @@ document.addEventListener('deviceready', function () {
     window.startGame();
 }, false);
 
-// since browsers don't fire the deviceready event, we simulate one here
-// remove this part during the build process for cordova apps!
-/* remove:start */
+// other entry point
 (function () {
-    var event;
-
     if (navigator.isCocoonJS) {
+        // CocoonJs is cordova
         return;
     }
+    if (window.cordova) {
+        // wait for device ready
+        return;
+    }
+
+    // playable ads
     if (window.mraid) {
-        // playables
         var hasStarted = false;
         if (window.mraid.getState() === 'loading') {
             // note: how long does mraid need for startup? if it takes long, 
@@ -182,23 +137,5 @@ document.addEventListener('deviceready', function () {
         }
         return;
     }
-
-    if (document.createEvent) {
-        event = document.createEvent("HTMLEvents");
-        event.initEvent("deviceready", true, true);
-    } else {
-        event = document.createEventObject();
-        event.eventType = "deviceready";
-    }
-
-    event.eventName = "deviceready";
-
-    if (document.createEvent) {
-        document.dispatchEvent(event);
-    } else {
-        document.fireEvent(event.eventType, event);
-    }
-
-    console.log('Starting web version');
+    window.startGame();
 })();
-/* remove:end */
