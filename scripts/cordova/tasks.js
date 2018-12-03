@@ -295,6 +295,16 @@ gulp.task('prepare-cordova-skip-build', function (callback) {
  * Generates signed and zipaligned apk
  * Note: does not perform a build task (anymore)
  */
+var ask = function (question, askCallback) {
+    var readline = require('readline');
+    var rl = readline.createInterface(process.stdin, process.stdout);
+    rl.question(question, function (answer) {
+        rl.close();
+        if (askCallback) {
+            askCallback(answer);
+        }
+    });
+};
 var deployAndroid = function (callback, signOnly) {
     var info = getXmlInfo();
     // var arg3 = process.argv[3];
@@ -311,16 +321,6 @@ var deployAndroid = function (callback, signOnly) {
         if (!fs.existsSync(buildExtrasPath)) {
             fs.writeFileSync(buildExtrasPath, contents);
         }
-    };
-    var ask = function (question, askCallback) {
-        var readline = require('readline');
-        var rl = readline.createInterface(process.stdin, process.stdout);
-        rl.question(question, function (answer) {
-            rl.close();
-            if (askCallback) {
-                askCallback(answer);
-            }
-        });
     };
     var signWithDebug = function () {
         var debugKeyLocation = isWindows ? '%HOMEPATH%\\.android\\debug.keystore' : '~/.android/debug.keystore';
@@ -408,7 +408,7 @@ var deployAndroid = function (callback, signOnly) {
     };
     var run = function () {
         addBuildFlavor();
-        
+
         if (signOnly) {
             signOther();
             return;
@@ -513,7 +513,7 @@ gulp.task('install-android', function (done) {
  */
 gulp.task('run-android', function (done) {
     runAndroid();
-        done();
+    done();
 });
 /**
  * Copy a test build to cordova projects
@@ -581,3 +581,53 @@ gulp.task('reinstall-plugins', function (callback) {
         }
     });
 });
+
+/**
+ * Delete an entire folder
+ * http://stackoverflow.com/a/32197381/5930772
+ */
+var deleteFolderRecursive = function (source) {
+    if (fs.existsSync(source)) {
+        fs.readdirSync(source).forEach(function (file, index) {
+            var curPath = path.join(source, file);
+            if (fs.lstatSync(curPath).isDirectory()) { // recurse
+                deleteFolderRecursive(curPath);
+            } else { // delete file
+                fs.unlinkSync(curPath);
+            }
+        });
+        fs.rmdirSync(source);
+    }
+};
+
+/**
+ * Clean cordova structure
+ */
+function cleanCordova(done) {
+    ask("Are you sure you want to clean? This will remove /plugins and /platforms and remove cordova/dependency entries from package.json (y/n) ", function (answer) {
+        var plugins = path.join('.', 'plugins');
+        var platforms = path.join('.', 'platforms');
+        var packageJsonStr;
+        var packageJson;
+        if (answer.toLowerCase() === 'y') {
+            if (fs.existsSync(plugins)) {
+                deleteFolderRecursive(plugins);
+            }
+            if (fs.existsSync(platforms)) {
+                deleteFolderRecursive(platforms);
+            }
+            if (fs.existsSync('package.json')) {
+                packageJsonStr = fs.readFileSync(path.join('package.json'), 'utf-8');
+                packageJson = JSON.parse(packageJsonStr);
+                delete packageJson.dependencies;
+                delete packageJson.cordova;
+                fs.writeFileSync('package.json', JSON.stringify(packageJson, null, 4));
+            }
+            done();
+        } else {
+            console.log('cancelled');
+            done();
+        }
+    });
+}
+gulp.task('clean-cordova', cleanCordova);
