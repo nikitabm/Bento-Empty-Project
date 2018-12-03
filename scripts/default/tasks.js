@@ -3,6 +3,7 @@ var gulp = require('gulp');
 // include the subset fonts tasks
 require('./subsetfonts');
 require('./subtasks');
+require('./generate-icons');
 
 /**
  * Generic build, suitable for Cordova (not Cocoon), usable on Web but build-web is preferred as Web deployment

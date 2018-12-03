@@ -38,6 +38,17 @@
         "jimp": "*",
         "gulp-inline": "*",
         "mimer": "*",
-        "lz-string": "*"
+        "lz-string": "*",
+        "sharp": "*"
+    },
+    "cordova": {
+        "platforms": [
+            "android",
+            "ios"
+        ]
+    },
+    "dependencies": {
+        "cordova-android": "6.4.0",
+        "cordova-ios": "4.5.4"
     }
 }
