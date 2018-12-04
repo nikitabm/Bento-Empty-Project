@@ -58,6 +58,7 @@
         <icon src="res/ios/icon-120.png" width="120" height="120" />
         <icon src="res/ios/icon-512.png" width="512" height="512" />
         <icon src="res/ios/icon-512@2x.png" width="1024" height="1024" />
+        <splash src="res/screens/ios/Default@2x~universal~anyany.png" />
     </platform>
     <platform name="android">
         <icon src="res/android/hdpi.png" density="hdpi" />
