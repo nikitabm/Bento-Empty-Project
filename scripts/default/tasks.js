@@ -10,6 +10,7 @@ require('./generate-icons');
  */
 gulp.task('build',
     gulp.series(
+        'checkWww',
         'mp3-only',
         'collect-assets',
         'clean',
@@ -27,6 +28,7 @@ gulp.task('build',
 );
 gulp.task('build-web',
     gulp.series(
+        'checkWww',
         'mp3-only',
         'collect-assets',
         'clean',
@@ -50,6 +52,7 @@ gulp.task('build-web',
 
 gulp.task('build-compact',
     gulp.series(
+        'checkWww',
         'build-web',
         'inline-assets',
         'add-assets-js',
@@ -58,6 +61,7 @@ gulp.task('build-compact',
     )
 );
 gulp.task('build-cocoonjs', gulp.series(
+    'checkWww',
     'ogg-only',
     'collect-assets',
     'clean',
@@ -84,6 +88,7 @@ gulp.task('watch', gulp.series('build', function () {
 
 
 gulp.task('build-desktop', gulp.series(
+    'checkWww',
     'ogg-only', // mp3 for windows?
     'build-web',
     'restore-audio',

@@ -128,6 +128,12 @@ var audioFormats = [
  */
 var jsons = {};
 
+function checkWww(done) {
+    if (!fs.existsSync(path.join('www'))) {
+        fs.mkdirSync(path.join('www'));
+    }
+}
+
 function collectLoop() {
     var src = [
         'assets/**/*.json',
@@ -885,6 +891,7 @@ function buildZip() {
 }
 
 // descriptions
+checkWww.description = "Check if /www exists and makes it";
 collectLoop.description = "Loops through available assets";
 copyToWww.description = "Copies all files and assets to the www folder";
 cleanWww.description = "Cleans the www folder";
@@ -910,6 +917,7 @@ useminWww.description = "Applies usemin to www/index.html";
 imageMin.description = "Run imagemin compression on all png files (works best on pixelart)";
 buildZip.description = "Creates a zip of www and stores it in build/build.zip";
 
+gulp.task('checkWww', checkWww);
 gulp.task('collectLoop', collectLoop);
 gulp.task('collect-assets', gulp.series('collectLoop', writeAssetsJson));
 gulp.task('collector', gulp.series('collectLoop', 'collect-assets', function () {
