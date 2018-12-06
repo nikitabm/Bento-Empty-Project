@@ -38,8 +38,7 @@
         "jimp": "*",
         "gulp-inline": "*",
         "mimer": "*",
-        "lz-string": "*",
-        "sharp": "*"
+        "lz-string": "*"
     },
     "cordova": {
         "platforms": [
