@@ -41,6 +41,6 @@ v1.2.1
 * Cordova project is no longer in the `/cordova` folder. Instead, the root folder is a Cordova project folder. All cordova commands will work from the root. As a result, the `/build` folder is now `/www` and `/cordova/build-deployments` is now `/build`. Note that config.xml is now maintained by Cordova, so it will reformat and remove comments from it. 
 * `gulp clean` is added to clean the cordova project. Will delete `/platforms` and `/plugins`. Also edits package.json: removes the cordova and dependencies groups, as Cordova >=7 mirrors config.xml. Appropiate changes will be made once Cordova decides to sunset config.xml, until then we must work with both files. 
 * `gulp build-cocoontest` is removed. `gulp build` is the default Cordova build, also usable for Web (Web deployments still prefer `gulp build-web`);
-* Updated all gulp tasks to gulp 4, use `npm install -i gulp-cli` to upgrade.
+* Updated all gulp tasks to gulp 4, use `npm install -g gulp-cli` to upgrade.
 * Added a `gulp generate-icons` task to generate app icons from `res/icon.png`. Default icons are also added as well as a universal splash screen for iOS.
 * PixiJS v3 is added and set as default renderer.
