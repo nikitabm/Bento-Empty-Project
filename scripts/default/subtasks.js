@@ -132,6 +132,7 @@ function checkWww(done) {
     if (!fs.existsSync(path.join('www'))) {
         fs.mkdirSync(path.join('www'));
     }
+    done();
 }
 
 function collectLoop() {
