@@ -36,6 +36,10 @@ Deploying to iOS or Android requires Cordova: `npm install -g cordova`
 
 ### Changelog
 
+v1.2.2
+* Fix bug in checkWww task
+* Update Bento, Utils.isNativeIos() and Utils.isNativeAndroid() would only work in Cocoon
+
 v1.2.1
 * Adding a version number matching the Bento version
 * Cordova project is no longer in the `/cordova` folder. Instead, the root folder is a Cordova project folder. All cordova commands will work from the root. As a result, the `/build` folder is now `/www` and `/cordova/build-deployments` is now `/build`. Note that config.xml is now maintained by Cordova, so it will reformat and remove comments from it. 
