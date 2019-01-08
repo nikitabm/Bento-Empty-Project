@@ -450,7 +450,7 @@ function packAssets(onComplete) {
                         // var height = rect.height;
                         var data = rect.data;
                         var subImage = jimpImages[data.imagePath];
-                        image.blit(subImage, x, y);
+                        image.composite(subImage, x, y);
 
                         // replace data part
                         delete rect.data;

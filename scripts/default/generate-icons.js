@@ -73,22 +73,31 @@ var androidIconSizes = [
 ];
 
 function generateIcons(done) {
-    var sharp = require('sharp'); // can't get jimp to work nowadays 
+    var Jimp = require('jimp');
     var iconPath = path.join('.', 'res', 'icon.png');
     var output = 'Copy paste the following into config.xml:\n\n';
+    var todo = 0;
+    var resized = 0;
     var resizeIcon = function (size, newPath, platform) {
         var filePath = path.join('res', platform, newPath + '.png');
-        var image = sharp(iconPath);
-        image.metadata().then(function (metaData) {
-            // resize image and save
-
+        Jimp.read(iconPath, function (err, image) {
+            if (err) {
+                throw err;
+            }
             if (!fs.existsSync(path.join('res', platform))) {
                 fs.mkdir(path.join('res', platform));
                 return;
             }
+            image.resize(size, size);
+            image.write(filePath, function () {
+                resized += 1;
 
-            image.resize(size, size).toFile(filePath);
+                if (resized >= todo) {
+                    done();
+                }
+            });
         });
+
         if (platform === 'ios') {
             output += '    <icon src="' + filePath + '" width="' + size + '" height="' + size + '" />\n';
         } else if (platform === 'android') {
@@ -102,6 +111,10 @@ function generateIcons(done) {
         done();
         return;
     }
+
+    todo += iosIconSizes.length;
+    todo += androidIconSizes.length;
+
     // iOS
     output += '<platform name="ios">\n';
     Utils.forEach(iosIcons, function (newPath, i) {
@@ -119,6 +132,6 @@ function generateIcons(done) {
     output += '</platform>\n';
 
     console.log(output);
-    done();
+    // done();
 }
 gulp.task('generate-icons', generateIcons);
