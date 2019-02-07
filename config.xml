@@ -75,5 +75,6 @@
 
     <!-- Include plugins here -->
     <plugin name="cordova-plugin-device" spec="*"/>
-
+    <plugin name="cordova-plugin-inappbrowser" spec="*" />
+    
 </widget>
