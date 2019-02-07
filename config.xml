@@ -72,6 +72,7 @@
     <!-- Settings -->
     <preference name="Orientation" value="portrait"/>
     <preference name="Fullscreen" value="true"/>
+    <preference name="AllowInlineMediaPlayback" value="true"/>
 
     <!-- Include plugins here -->
     <plugin name="cordova-plugin-device" spec="*"/>
