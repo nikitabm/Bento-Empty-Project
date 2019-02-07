@@ -40,5 +40,6 @@
     "share": "Share",
     "moreGames": "More games",
     "newVersion": "A new version is available. Do you want to download %1?",
-    "iapRemovesAd": "Any purchase removes the forced ads in-game"
+    "iapRemovesAd": "Any purchase removes the forced ads in-game",
+    "play": "Play"
 }

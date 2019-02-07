@@ -40,5 +40,6 @@
     "share": "Partager",
     "moreGames": "Autres jeux",
     "newVersion": "Une nouvelle version est disponible. Souhaitez-vous télécharger %1 ?",
-    "iapRemovesAd": "N'importe quel achat retire les publicités obligatoires dans le jeu"
+    "iapRemovesAd": "N'importe quel achat retire les publicités obligatoires dans le jeu",
+    "play": "Jouer"
 }
