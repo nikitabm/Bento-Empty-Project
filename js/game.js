@@ -63,13 +63,13 @@ window.startGame = function () {
             name: 'Empty Project',
             canvasId: 'canvas',
             renderer: Utils.isCocoonJs() ? 'canvas2d' : 'pixi',
-            pixelSize: 3,
+            pixelSize: 3, // additional scaling
             antiAlias: false,
-            manualResize: true,
             useDeltaT: false,
             autoThrottle: false,
             subPixel: true,
-            preventContextMenu: true,
+            useQueries: true, // add query strings to asset http requests
+            preventContextMenu: true, // prevent right-click context menu
             // canvasDimension: new Rectangle(0, 0, 640, 480), // use this if responsiveResize is false
             responsiveResize: {
                 landscape: false,

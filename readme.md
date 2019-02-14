@@ -36,6 +36,12 @@ Deploying to iOS or Android requires Cordova: `npm install -g cordova`
 
 ### Changelog
 
+v1.2.3
+* Stop using Sharp and replace with Jimp again, fix transparency issue with packed textures
+* Added "Play" as general translation text
+* Added cordova-plugin-inappbrowser plugin
+* Update Bento, add useQueries option as default true
+
 v1.2.2
 * Fix bug in checkWww task
 * Update Bento, Utils.isNativeIos() and Utils.isNativeAndroid() would only work in Cocoon
