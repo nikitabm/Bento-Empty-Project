@@ -76,7 +76,6 @@ gulp.task('default', function (done) {
 
     var askCordova = function () {
         var strings = {
-            newCordovaBuild: 'Create a new Cordova project',
             prepareCordova: 'Run cordova prepare',
             copyBuildToCordova: 'Copy the build folder to Cordova',
             cordovaWatch: 'Start a Cordova watcher',
@@ -92,7 +91,6 @@ gulp.task('default', function (done) {
             name: 'question',
             message: 'What kind of build do you want to make?',
             choices: [
-                strings.newCordovaBuild,
                 strings.prepareCordova,
                 strings.copyBuildToCordova,
                 strings.cordovaWatch,
@@ -104,11 +102,7 @@ gulp.task('default', function (done) {
                 exitStr
             ]
         }]).then(function (answers) {
-            if (answers.question === strings.newCordovaBuild) {
-                askConfirmation('WARNING: This will delete the old Cordova project. Do you want to proceed?', function () {
-                    gulp.task('build-cordova')(done);
-                }, null);
-            } else if (answers.question === strings.prepareCordova) {
+            if (answers.question === strings.prepareCordova) {
                 gulp.task('prepare-cordova')(done);
             } else if (answers.question === strings.copyBuildToCordova) {
                 gulp.task('copy-www-cordova')(done);

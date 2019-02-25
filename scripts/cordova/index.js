@@ -396,9 +396,10 @@ var deployAndroid = function (callback, signOnly) {
                     return;
                 }
                 console.log('Finished.');
+                callback();
             });
         } else {
-            execCommand(zipAlignPath, ['-f', /*'-v',*/ '4', signed, output]);
+            execCommand(zipAlignPath, ['-f', /*'-v',*/ '4', signed, output], callback);
         }
         console.log('Build saved to ' + output);
     };

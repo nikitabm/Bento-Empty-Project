@@ -30,8 +30,10 @@
         <allow-intent href="itms:*" />
         <allow-intent href="itms-apps:*" />
     </platform>
-    <engine name="android" spec="6.4.0" />
-    <engine name="ios" spec="4.5.4" />
+    <engine name="android" spec="^8.0.0" />
+    <engine name="ios" spec="^5.0.0" />
+    <preference name="android-minSdkVersion" value="16" />
+    <preference name="android-targetSdkVersion" value="26" />
 
     <platform name="ios">
         <icon src="res/ios/icon-20.png" width="20" height="20" />

@@ -39,15 +39,5 @@
         "gulp-inline": "*",
         "mimer": "*",
         "lz-string": "*"
-    },
-    "cordova": {
-        "platforms": [
-            "android",
-            "ios"
-        ]
-    },
-    "dependencies": {
-        "cordova-android": "6.4.0",
-        "cordova-ios": "4.5.4"
     }
 }

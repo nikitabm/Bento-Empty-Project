@@ -18,18 +18,24 @@ Included in this project are some useful scripts. Typically to make deployments 
 
 Also needed is a global npm package Gulp `npm install -g gulp-cli`. Some scripts may require FFmpeg for audio conversions.
 
+Run `gulp` to see all commands.
+
+### Common gulp tasks
+
+#### Assets
+
 These gulp commands are for adding assets to the game.
 
 * `gulp collect-assets`: Collects all assets to load in assets.json. (Much easier than managing assets by hand)
 * `gulp collector`: Watches the assets folder. Placing assets in the `/assets` folder automatically runs collect-assets.
 
-### Deploying
+#### Deploying
 
 Deploying to iOS or Android requires Cordova: `npm install -g cordova`
 
 * `gulp build`: For deploying a generic Cordova build
 * `gulp build-web`: For deploying a web build, minifies and concatenates Javascript files and applies strong compressions. 
-* `gulp build-compact`: Web build withall assets inlined into an HTML file.
+* `gulp build-compact`: Web build with all assets inlined into an HTML file.
 * `gulp build-cocoonjs`: For deploying a Cocoon.io project. Minifies Javascript files, inserts Cordova references.
 * `gulp prepare-cordova`: Runs `cordova prepare` in the cordova project after a build.
 * `gulp deploy-android`: Builds and signs an apk
