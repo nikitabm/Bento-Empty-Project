@@ -32,8 +32,7 @@
     </platform>
     <engine name="android" spec="^8.0.0" />
     <engine name="ios" spec="^5.0.0" />
-    <preference name="android-minSdkVersion" value="16" />
-    <preference name="android-targetSdkVersion" value="26" />
+    <preference name="android-minSdkVersion" value="19" />
 
     <platform name="ios">
         <icon src="res/ios/icon-20.png" width="20" height="20" />
