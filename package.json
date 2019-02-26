@@ -38,6 +38,7 @@
         "jimp": "*",
         "gulp-inline": "*",
         "mimer": "*",
-        "lz-string": "*"
+        "lz-string": "*",
+        "xml2js": "*"
     }
 }
