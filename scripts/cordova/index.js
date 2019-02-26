@@ -342,6 +342,56 @@ var deployAndroid = function (callback, signOnly) {
             zipalign();
         });
     };
+    var findApk = function () {
+        var didFind = false;
+        var walkSync = function (currentDirPath, onApk) {
+            if (didFind) {
+                return;
+            }
+            var files = fs.readdirSync(currentDirPath);
+            files.forEach(function (name) {
+                if (didFind) {
+                    return;
+                }
+                var filePath = path.join(currentDirPath, name);
+                if (!fs.existsSync(filePath)) {
+                    return;
+                }
+                var stat = fs.statSync(filePath);
+                var ext = path.extname(name);
+                if (stat.isFile() && ext === '.apk') {
+                    onApk(filePath, stat);
+                } else if (stat.isDirectory()) {
+                    walkSync(filePath, onApk);
+                }
+            });
+
+        };
+
+        // first try known locations
+        if (fs.existsSync(apk)) {
+            return;
+        }
+        apk = path.join('platforms', 'android', 'app', 'build', 'outputs', 'apk', 'release', 'android-release-unsigned.apk');
+        if (fs.existsSync(apk)) {
+            signed = path.join('platforms', 'android', 'app', 'build', 'outputs', 'apk', 'release', 'signed.apk');
+            return;
+        }
+        
+        // search platforms/android folder for the built apk file
+        walkSync(path.join('platforms', 'android'), function (apkPath) {
+            var dirName = path.dirname(apkPath);
+            apk = apkPath;
+            signed = path.join(dirName, 'signed.apk');
+            signOther();
+            didFind = true;
+        });
+        if (!didFind) {
+            console.log("ERROR: could not find generated apk file.");
+            callback();
+        }
+
+    };
     var signOther = function () {
         // var keystore = path.join(isWindows ? '..' : '.', 'scripts', 'luckykat.keystore');
         ask("Path to keystore (enter debug for debug keystore): ", function (keyStorePath) {
@@ -389,23 +439,29 @@ var deployAndroid = function (callback, signOnly) {
         if (isWindows) {
             zipAlignPath = path.join('.', 'scripts', 'cordova', 'zipalign-win', 'zipalign.exe');
             exec(zipAlignPath + ' -f 4 ' + signed + ' ' + output, function (error, stdout, stderr) {
-                console.log(stdout);
                 if (error) {
                     console.log('ERROR could not zipalign.');
                     console.log(stderr);
                     return;
                 }
-                console.log('Finished.');
+                console.log('Finished! Build saved to\n  ->  ' + output);
                 callback();
             });
         } else {
-            execCommand(zipAlignPath, ['-f', /*'-v',*/ '4', signed, output], callback);
+            execCommand(zipAlignPath, ['-f', /*'-v',*/ '4', signed, output], function (error, stdout, stderr) {
+                if (error) {
+                    console.log('ERROR could not zipalign.');
+                    console.log(stderr);
+                    return;
+                }
+                console.log('Finished! Build saved to\n  ->  ' + output);
+                callback();
+            });
         }
-        console.log('Build saved to ' + output);
     };
     var build = function () {
         console.log('Build android...');
-        execCordova(['build', '--release', 'android'], signOther);
+        execCordova(['build', '--release', 'android'], findApk);
     };
     var run = function () {
         addBuildFlavor();
