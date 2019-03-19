@@ -33,6 +33,7 @@
     <engine name="android" spec="^8.0.0" />
     <engine name="ios" spec="^5.0.0" />
     <preference name="android-minSdkVersion" value="19" />
+    <preference name="WKPort" value="8080" />
 
     <platform name="ios">
         <icon src="res/ios/icon-20.png" width="20" height="20" />
@@ -62,12 +63,25 @@
         <splash src="res/screens/ios/Default@2x~universal~anyany.png" />
     </platform>
     <platform name="android">
+        <!-- Legacy icons -->
         <icon src="res/android/hdpi.png" density="hdpi" />
         <icon src="res/android/ldpi.png" density="ldpi" />
         <icon src="res/android/mdpi.png" density="mdpi" />
         <icon src="res/android/xhdpi.png" density="xhdpi" />
         <icon src="res/android/xxhdpi.png" density="xxhdpi" />
         <icon src="res/android/xxxhdpi.png" density="xxxhdpi" />
+        <!-- Adaptive icons -->
+        <resource-file src="res/android/mipmap-anydpi-v26/ic_launcher.xml" target="app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml" />
+        <resource-file src="res/android/mipmap-hdpi-v26/ic_launcher_foreground.png" target="app/src/main/res/mipmap-hdpi-v26/ic_launcher_foreground.png" />
+        <resource-file src="res/android/mipmap-hdpi-v26/ic_launcher_background.png" target="app/src/main/res/mipmap-hdpi-v26/ic_launcher_background.png" />
+        <resource-file src="res/android/mipmap-mdpi-v26/ic_launcher_foreground.png" target="app/src/main/res/mipmap-mdpi-v26/ic_launcher_foreground.png" />
+        <resource-file src="res/android/mipmap-mdpi-v26/ic_launcher_background.png" target="app/src/main/res/mipmap-mdpi-v26/ic_launcher_background.png" />
+        <resource-file src="res/android/mipmap-xhdpi-v26/ic_launcher_foreground.png" target="app/src/main/res/mipmap-xhdpi-v26/ic_launcher_foreground.png" />
+        <resource-file src="res/android/mipmap-xhdpi-v26/ic_launcher_background.png" target="app/src/main/res/mipmap-xhdpi-v26/ic_launcher_background.png" />
+        <resource-file src="res/android/mipmap-xxhdpi-v26/ic_launcher_foreground.png" target="app/src/main/res/mipmap-xxhdpi-v26/ic_launcher_foreground.png" />
+        <resource-file src="res/android/mipmap-xxhdpi-v26/ic_launcher_background.png" target="app/src/main/res/mipmap-xxhdpi-v26/ic_launcher_background.png" />
+        <resource-file src="res/android/mipmap-xxxhdpi-v26/ic_launcher_foreground.png" target="app/src/main/res/mipmap-xxxhdpi-v26/ic_launcher_foreground.png" />
+        <resource-file src="res/android/mipmap-xxxhdpi-v26/ic_launcher_background.png" target="app/src/main/res/mipmap-xxxhdpi-v26/ic_launcher_background.png" />
     </platform>
 
     <!-- Settings -->

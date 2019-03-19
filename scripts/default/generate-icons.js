@@ -1,3 +1,5 @@
+/* jshint esversion:6 */
+
 var Utils = require('./utils');
 var gulp = require('gulp');
 var path = require('path');
@@ -56,54 +58,108 @@ var iosIconSizes = [
     512 * 2
 ];
 var androidIcons = [
-    'hdpi',
     'ldpi',
     'mdpi',
+    'hdpi',
     'xhdpi',
     'xxhdpi',
     'xxxhdpi'
 ];
 var androidIconSizes = [
-    72,
-    36,
-    48,
-    96,
-    144,
-    192
+    36, // ldpi
+    48, // mdpi
+    72, // hdpi
+    96, // xhdpi
+    144, // xxhdpi
+    192 // xxxhdpi
 ];
+var androidAdaptiveIconSizes = [
+    54, // ldpi
+    108, // mdpi
+    162, // hdpi
+    216, // xhdpi
+    324, // xxhdpi
+    432 // xxxhdpi
+];
+var ic_launcher_xml = `<?xml version="1.0" encoding="utf-8"?>
+<adaptive-icon xmlns:android="http://schemas.android.com/apk/res/android">
+    <background android:drawable="@mipmap/ic_launcher_background"/>
+    <foreground android:drawable="@mipmap/ic_launcher_foreground"/>
+</adaptive-icon>`;
 
 function generateIcons(done) {
     var Jimp = require('jimp');
     var iconPath = path.join('.', 'res', 'icon.png');
+    var iconForeground = path.join('.', 'res', 'icon-foreground.png');
+    var iconBackground = path.join('.', 'res', 'icon-background.png');
+    var shouldGenerateAdaptive = (
+        fs.existsSync(iconForeground) && 
+        fs.existsSync(iconBackground) && 
+        fs.existsSync(path.join('platforms', 'android', 'app', 'src', 'main', 'res'))
+    );
     var output = 'Copy paste the following into config.xml:\n\n';
     var todo = 0;
     var resized = 0;
-    var resizeIcon = function (size, newPath, platform) {
-        var filePath = path.join('res', platform, newPath + '.png');
-        Jimp.read(iconPath, function (err, image) {
+    // resize icon
+    var resizeIcon = function (inputPath, outputPath, size, onComplete) {
+        Jimp.read(inputPath, function (err, image) {
             if (err) {
                 throw err;
             }
-            if (!fs.existsSync(path.join('res', platform))) {
-                fs.mkdir(path.join('res', platform));
-                return;
-            }
             image.resize(size, size);
-            image.write(filePath, function () {
-                resized += 1;
+            image.write(outputPath, onComplete);
+        });
+    };
+    // resize icon and save the output path
+    var resizeAndPrint = function (size, iconType, platform) {
+        var outputPath = path.join('res', platform, iconType + '.png');
 
-                if (resized >= todo) {
-                    done();
-                }
-            });
+        // make platform folders in res/
+        if (!fs.existsSync(path.join('res', platform))) {
+            fs.mkdirSync(path.join('res', platform));
+        }
+
+        resizeIcon(iconPath, outputPath, size, function () {
+            resized += 1;
+
+            if (resized >= todo) {
+                done();
+            }
         });
 
         if (platform === 'ios') {
-            output += '    <icon src="' + filePath + '" width="' + size + '" height="' + size + '" />\n';
+            output += '    <icon src="' + outputPath + '" width="' + size + '" height="' + size + '" />\n';
         } else if (platform === 'android') {
-            output += '    <icon src="' + filePath + '" density="' + newPath + '" />\n';
+            output += '    <icon src="' + outputPath + '" density="' + iconType + '" />\n';
+        }
+    };
+    // Android only: adaptive icons
+    var resizeAdaptiveAndPrint = function (size, iconType) {
+        var outputForeground = path.join('res', 'android', 'mipmap-' + iconType + '-v26', 'ic_launcher_foreground.png');
+        var outputBackground = path.join('res', 'android', 'mipmap-' + iconType + '-v26', 'ic_launcher_background.png');
+        var targetForeground = path.join('app', 'src', 'main', 'res', 'mipmap-' + iconType + '-v26', 'ic_launcher_foreground.png');
+        var targetBackground = path.join('app', 'src', 'main', 'res', 'mipmap-' + iconType + '-v26', 'ic_launcher_background.png');
+        var onComplete = function () {
+            resized += 1;
+
+            if (resized >= todo) {
+                done();
+            }
+        };
+
+        // make 'android' folders in res/
+        if (!fs.existsSync(path.join('res', 'android'))) {
+            fs.mkdirSync(path.join('res', 'android'));
+        }
+        if (!fs.existsSync(path.join('res', 'android', 'mipmap-' + iconType + '-v26'))) {
+            fs.mkdirSync(path.join('res', 'android', 'mipmap-' + iconType + '-v26'));
         }
 
+        resizeIcon(iconForeground, outputForeground, size, onComplete);
+        resizeIcon(iconBackground, outputBackground, size, onComplete);
+
+        output += '    <resource-file src="' + outputForeground + '" target="' + targetForeground + '" />\n';
+        output += '    <resource-file src="' + outputBackground + '" target="' + targetBackground + '" />\n';
     };
 
     if (!fs.existsSync(iconPath)) {
@@ -115,23 +171,44 @@ function generateIcons(done) {
     todo += iosIconSizes.length;
     todo += androidIconSizes.length;
 
+    if (shouldGenerateAdaptive) {
+        todo += androidIconSizes.length * 2;
+    }
+
     // iOS
     output += '<platform name="ios">\n';
-    Utils.forEach(iosIcons, function (newPath, i) {
+    Utils.forEach(iosIcons, function (iconType, i) {
         var size = iosIconSizes[i];
-        resizeIcon(size, newPath, 'ios');
+        resizeAndPrint(size, iconType, 'ios');
     });
     output += '</platform>\n';
 
-    // Android
-    output += '<platform name="android">\n';
-    Utils.forEach(androidIcons, function (newPath, i) {
+    // Android legacy icons
+    output += '<platform name="android">\n    <!-- Legacy icons -->\n';
+    Utils.forEach(androidIcons, function (iconType, i) {
         var size = androidIconSizes[i];
-        resizeIcon(size, newPath, 'android');
+        resizeAndPrint(size, iconType, 'android');
     });
+    // Android adaptive icons
+    if (shouldGenerateAdaptive) {
+        output += '    <!-- Adaptive icons -->\n';
+        // add xml if needed
+        if (!fs.existsSync(path.join('res', 'android', 'mipmap-anydpi-v26'))) {
+            fs.mkdirSync(path.join('res', 'android', 'mipmap-anydpi-v26'));
+        }
+        if (!fs.existsSync(path.join('res', 'android', 'mipmap-anydpi-v26', 'ic_launcher.xml'))) {
+            fs.writeFileSync(path.join('res', 'android', 'mipmap-anydpi-v26', 'ic_launcher.xml'), ic_launcher_xml);
+        }
+        Utils.forEach(androidIcons, function (iconType, i) {
+            var size = androidAdaptiveIconSizes[i];
+            resizeAdaptiveAndPrint(size, iconType);
+        });
+    }
     output += '</platform>\n';
 
     console.log(output);
     // done();
 }
+generateIcons.description = "Generates a set of icons from res/icon.png";
+
 gulp.task('generate-icons', generateIcons);
