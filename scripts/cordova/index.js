@@ -309,9 +309,10 @@ var deployAndroid = function (callback, signOnly) {
     var info = getXmlInfo();
     // var arg3 = process.argv[3];
     // note: the path or filename may change depending on android studio sdk version
-    var apk = path.join('platforms', 'android', 'build', 'outputs', 'apk', 'release', 'android-release-unsigned.apk');
-    var signed = path.join('platforms', 'android', 'build', 'outputs', 'apk', 'release', 'signed.apk');
+    var apkPath = path.join('platforms', 'android', 'build', 'outputs', 'apk', 'release', 'android-release-unsigned.apk');
+    var signedPath = path.join('platforms', 'android', 'build', 'outputs', 'apk', 'release', 'signed.apk');
     var usedDebugKey = false;
+
     var addBuildFlavor = function () {
         var buildExtrasPath = path.join('platforms', 'android', 'build-extras.gradle');
         var contents =
@@ -322,26 +323,7 @@ var deployAndroid = function (callback, signOnly) {
             fs.writeFileSync(buildExtrasPath, contents);
         }
     };
-    var signWithDebug = function () {
-        var debugKeyLocation = isWindows ? '%HOMEPATH%\\.android\\debug.keystore' : '~/.android/debug.keystore';
-        // sign
-        // duplicate apk
-        copyFileSync(apk, signed);
-        //jarsigner -verbose -keystore luckykat.keystore -storepass [pass] -keypass [pass] input.apk heigames
-        // note: timestamp warning for jdk 1.7
-        console.log('Signing...');
-        exec('jarsigner -verbose -digestalg SHA1 -sigalg MD5withRSA -tsa http://timestamp.digicert.com -keystore ' + debugKeyLocation + ' -storepass android -keypass android ' + signed + ' androiddebugkey', {
-            maxBuffer: 1024 * 500
-        }, function (error, stdout, stderr) {
-            // don't log this stdout as it's just a giant list of all the files in the APK
-            // console.log(stdout);
-            if (error) {
-                console.error(error);
-                return;
-            }
-            zipalign();
-        });
-    };
+
     var findApk = function () {
         var didFind = false;
         var walkSync = function (currentDirPath, onApk) {
@@ -365,7 +347,6 @@ var deployAndroid = function (callback, signOnly) {
                     walkSync(filePath, onApk);
                 }
             });
-
         };
 
         // first try known locations
@@ -374,15 +355,15 @@ var deployAndroid = function (callback, signOnly) {
         }
         apk = path.join('platforms', 'android', 'app', 'build', 'outputs', 'apk', 'release', 'android-release-unsigned.apk');
         if (fs.existsSync(apk)) {
-            signed = path.join('platforms', 'android', 'app', 'build', 'outputs', 'apk', 'release', 'signed.apk');
+            signedPath = path.join('platforms', 'android', 'app', 'build', 'outputs', 'apk', 'release', 'signed.apk');
             return;
         }
-        
+
         // search platforms/android folder for the built apk file
         walkSync(path.join('platforms', 'android'), function (apkPath) {
             var dirName = path.dirname(apkPath);
             apk = apkPath;
-            signed = path.join(dirName, 'signed.apk');
+            signedPath = path.join(dirName, 'signed.apk');
             signOther();
             didFind = true;
         });
@@ -390,33 +371,95 @@ var deployAndroid = function (callback, signOnly) {
             console.log("ERROR: could not find generated apk file.");
             callback();
         }
+    };
 
+    var sign = function (keyLocation, alias, pass) {
+        copyFileSync(apkPath, signedPath);
+        //jarsigner -verbose -keystore luckykat.keystore -storepass [pass] -keypass [pass] input.apk heigames
+        // note: timestamp warning for jdk 1.7
+        console.log('Signing...');
+        exec([
+            'jarsigner',
+            '-verbose',
+            '-digestalg SHA1',
+            '-sigalg MD5withRSA',
+            '-tsa http://timestamp.digicert.com',
+            '-keystore ' + keyLocation,
+            pass ? '-storepass "' + pass + '" -keypass "' + pass + '"' : '',
+            signedPath,
+            alias
+        ].join(' '), {
+            maxBuffer: 1024 * 500
+        }, function (error, stdout, stderr) {
+            // don't log this stdout as it's just a giant list of all the files in the APK
+            // console.log(stdout);
+            if (error) {
+                console.error(error);
+                return;
+            }
+            zipalign();
+        });
+    };
+
+    //TODO ideally the credentials are stored outside of the project with
+    //a unique name (based on the project folder name?) to prevent them
+    //from ever accidentally being checked in
+    var credentialsLocation = "./android-keystore-credentials.json";
+    var loadCredentials = function () {
+        var credentials;
+        try {
+            fs.accessSync(credentialsLocation, fs.constants.R_OK | fs.constants.W_OK);
+            var content = fs.readFileSync(credentialsLocation);
+            credentials = JSON.parse(content);
+            console.log('\x1b[32mprevious credentials found!');
+            console.log('leave input blank to use [[' + credentials.alias + ' @ ' + credentials.path + ']]\x1b[0m');
+        } catch (err) {
+            //console.error(err);
+            console.log('no previous credentials found');
+        }
+
+        return credentials;
+    };
+    var saveCredentials = function (keyPath, alias, pass) {
+        var credentials = {
+            path: keyPath,
+            alias: alias,
+            pass: pass
+        };
+
+        try {
+            fs.accessSync(credentialsLocation, fs.constants.R_OK | fs.constants.W_OK);
+        } catch (err) {
+            //credentials weren't saved yet, warn about not checking them in
+            console.log("\x1b[41m\x1b[37m[[WARNING]]");
+            console.log("storing credentials at " + credentialsLocation + ". Make sure they're not checked in to git!\x1b[0m");
+        }
+
+        fs.writeFileSync(credentialsLocation, JSON.stringify(credentials));
+    };
+
+    var signWithDebug = function () {
+        usedDebugKey = true;
+        var debugKeyLocation = isWindows ? '%HOMEPATH%\\.android\\debug.keystore' : '~/.android/debug.keystore';
+        sign(debugKeyLocation, 'androiddebugkey', 'android');
     };
     var signOther = function () {
-        // var keystore = path.join(isWindows ? '..' : '.', 'scripts', 'luckykat.keystore');
+        var credentials = loadCredentials();
         ask("Path to keystore (enter debug for debug keystore): ", function (keyStorePath) {
-            var keystore = keyStorePath;
-            if (keystore === 'debug') {
-                usedDebugKey = true;
+            if (keyStorePath === 'debug') {
                 signWithDebug();
                 return;
             }
-            ask("Keystore password: ", function (pass) {
-                // sign
-                // duplicate apk
-                copyFileSync(apk, signed);
-                // note: timestamp warning for jdk 1.7
-                console.log('Signing...');
-                exec('jarsigner -verbose -digestalg SHA1 -sigalg MD5withRSA -tsa http://timestamp.digicert.com -keystore ' + keystore + (pass ? ' -storepass ' + pass + ' -keypass ' + pass + " " : "") + signed + ' heigames', {
-                    maxBuffer: 1024 * 500
-                }, function (error, stdout, stderr) {
-                    // don't log this stdout as it's just a giant list of all the files in the APK
-                    // console.log(stdout);
-                    if (error) {
-                        console.error(error);
-                        return;
-                    }
-                    zipalign();
+            if (keyStorePath === '' && credentials) {
+                sign(credentials.path, credentials.alias, credentials.pass);
+                return;
+            } else if (!keyStorePath) {
+                //TODO keep asking for keyStorePath somehow. Likewise for alias and key
+            }
+            ask("Alias:", function (alias) {
+                ask("Keystore password: ", function (pass) {
+                    sign(keyStorePath, alias, pass);
+                    saveCredentials(keyStorePath, alias, pass);
                 });
             });
         });
@@ -438,7 +481,7 @@ var deployAndroid = function (callback, signOnly) {
         // execCommand(zipAlignPath + isWindows ? '.exe' : '', ['-f', /*'-v',*/ '4', signed, output]);
         if (isWindows) {
             zipAlignPath = path.join('.', 'scripts', 'cordova', 'zipalign-win', 'zipalign.exe');
-            exec(zipAlignPath + ' -f 4 ' + signed + ' ' + output, function (error, stdout, stderr) {
+            exec(zipAlignPath + ' -f 4 ' + signedPath + ' ' + output, function (error, stdout, stderr) {
                 if (error) {
                     console.log('ERROR could not zipalign.');
                     console.log(stderr);
@@ -448,7 +491,7 @@ var deployAndroid = function (callback, signOnly) {
                 callback();
             });
         } else {
-            execCommand(zipAlignPath, ['-f', /*'-v',*/ '4', signed, output], function (error, stdout, stderr) {
+            execCommand(zipAlignPath, ['-f', /*'-v',*/ '4', signedPath, output], function (error, stdout, stderr) {
                 if (error) {
                     console.log('ERROR could not zipalign.');
                     console.log(stderr);
@@ -481,7 +524,7 @@ gulp.task('deploy-android', function (callback) {
     deployAndroid(callback, false);
 });
 /*
- * (Re-)sign the unsigned apk 
+ * (Re-)sign the unsigned apk
  */
 gulp.task('sign-android', function (callback) {
     deployAndroid(callback, true);
