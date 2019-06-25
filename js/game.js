@@ -100,8 +100,10 @@ document.addEventListener('deviceready', function () {
     window.startGame();
 }, false);
 
+
 // other entry point
-(function () {
+window.onload = function () {
+    var isStarted = false;
     if (navigator.isCocoonJS) {
         // CocoonJs is cordova
         return;
@@ -111,23 +113,73 @@ document.addEventListener('deviceready', function () {
         return;
     }
 
+
+    var beginGame = function () {
+        //only start once
+        if (!isStarted) {
+            isStarted = true;
+            window.startGame();
+
+            //dapi needs this for some reason else it won't pass
+            if (window.dapi) {
+                var value = window.dapi.getAudioVolume();
+                window.dapi.addEventListener("audioVolumeChange", function () {
+                    console.log('Volume Changed ?');
+                });
+            }
+        }
+    };
+
+    var onViewableChange = function () {
+        if (!isStarted && window.dapi.isViewable()) {
+            //kill listener
+            window.dapi.removeEventListener("viewableChange", onViewableChange);
+            beginGame();
+        }
+    };
+
+    var onReady = function () {
+        //kill listener
+        window.dapi.removeEventListener("ready", onReady);
+        // wait until we can view the ad
+        if (window.dapi.isViewable()) {
+            beginGame();
+        } else {
+            window.dapi.addEventListener("viewableChange", onViewableChange);
+        }
+    };
+
     // playable ads
+    // DAPI
+    if (window.dapi) {
+        if (!window.dapi.isReady()) {
+            // note: how long does dapi need for startup? if it takes long, 
+            // we should make a loading screen in an html div and remove it when loading is complete
+            window.dapi.addEventListener("ready", onReady);
+        } else {
+            onReady();
+        }
+        return;
+    }
+
+    // MRAID
     if (window.mraid) {
-        var hasStarted = false;
+        var isStartedMRAID = false;
         if (window.mraid.getState() === 'loading') {
             // note: how long does mraid need for startup? if it takes long, 
             // we should make a loading screen in an html div and remove it when loading is complete
             window.mraid.addEventListener("ready", function () {
-                if (!hasStarted) {
+                if (!isStartedMRAID) {
                     window.startGame();
-                    hasStarted = true;
+                    isStartedMRAID = true;
                 }
             });
         } else {
             window.startGame();
-            hasStarted = true;
+            isStartedMRAID = true;
         }
         return;
     }
-    window.startGame();
-})();
+
+    beginGame();
+};
