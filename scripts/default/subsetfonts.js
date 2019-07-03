@@ -163,7 +163,7 @@ gulp.task('editGulpFontMin', function (done) {
     var indexJs;
     var indexJsPath = path.join('.', 'node_modules', 'gulp-fontmin', 'index.js');
     // edit gulp-fontmin/index.js
-    if (!fs.existsSync(indexJsPath)) {
+    if (fs.existsSync(indexJsPath)) {
         indexJs = fs.readFileSync(indexJsPath, 'utf-8');
         indexJs = indexJs.replace('.use(Fontmin.ttf2eot())', '');
         indexJs = indexJs.replace('.use(Fontmin.ttf2woff())', '');
