@@ -11,10 +11,6 @@ bento.define('entities/luckykatlogo', [
     'bento/components/sprite',
     'bento/components/clickable',
     'bento/entity',
-    'bento/gui/clickbutton',
-    'bento/gui/counter',
-    'bento/gui/text',
-    'bento/eventsystem',
     'bento/utils',
     'bento/tween'
 ], function (
@@ -24,10 +20,6 @@ bento.define('entities/luckykatlogo', [
     Sprite,
     Clickable,
     Entity,
-    ClickButton,
-    Counter,
-    Text,
-    EventSystem,
     Utils,
     Tween
 ) {
@@ -42,23 +34,6 @@ bento.define('entities/luckykatlogo', [
                 new Sprite({
                     imageName: 'luckykat-160',
                     originRelative: new Vector2(0.5, 0.5)
-                }),
-                new Clickable({
-                    onClick: function (data) {
-                        // bounce when user click on the lucky cat
-                        new Tween({
-                            from: 0.25,
-                            to: 0,
-                            in: 60,
-                            ease: 'elastic',
-                            decay: 5,
-                            oscillations: 3,
-                            onUpdate: function (v, t) {
-                                entity.scale.x = 1 + v;
-                                entity.scale.y = 1 - v;
-                            }
-                        });
-                    }
                 })
             ]
         });
