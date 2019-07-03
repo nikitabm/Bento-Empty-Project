@@ -14,6 +14,7 @@
         "graceful-fs": "*",
         "gulp": "*",
         "gulp-add-src": "*",
+        "gulp-cache": "*",
         "gulp-clean": "*",
         "gulp-concat": "*",
         "gulp-fontmin": "*",

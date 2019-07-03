@@ -853,12 +853,17 @@ function audioOptimizationOgg() {
 
 function imageMin(callback) {
     var imagemin = require('gulp-imagemin');
+    var cache = require('gulp-cache');
     return gulp.src([
             './www/assets/**/*.png'
         ], {
             base: './'
         })
-        .pipe(imagemin())
+        .pipe(cache(
+            imagemin(), {
+                name: 'imagemin'
+            }
+        ))
         .pipe(gulp.dest('./'));
 }
 
@@ -891,6 +896,12 @@ function buildZip() {
         .pipe(gulp.dest(path.join('.', 'build')));
 }
 
+function clearCache() {
+    var cache = require('gulp-cache');
+    cache.clearAll();
+}
+
+
 // descriptions
 checkWww.description = "Check if /www exists and makes it";
 collectLoop.description = "Loops through available assets";
@@ -917,6 +928,7 @@ audioOptimizationOgg.description = "Slight compression to all ogg files";
 useminWww.description = "Applies usemin to www/index.html";
 imageMin.description = "Run imagemin compression on all png files (works best on pixelart)";
 buildZip.description = "Creates a zip of www and stores it in build/build.zip";
+clearCache.description = "Clears cache in gulp-cache";
 
 gulp.task('checkWww', checkWww);
 gulp.task('collectLoop', collectLoop);
@@ -961,3 +973,4 @@ gulp.task('inline-assets', inlineAssets);
 gulp.task('add-assets-js', includeAssetsJsInWwwHtml);
 gulp.task('inline-html', inlineIntoIndexHtml);
 gulp.task('buildZip', buildZip);
+gulp.task('clear-cache', clearCache);
