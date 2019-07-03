@@ -6,4 +6,6 @@
 /platforms/
 /plugins/
 *.log
+yarn.lock
+package-lock.json
 build.zip
