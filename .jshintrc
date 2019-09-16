@@ -8,7 +8,7 @@
     "unused": "vars", // complain about unused vars
     "loopfunc": true, // true: Tolerate functions being defined in loops
     "undef": true, // true: Require all non-global variables to be declared (prevents global leaks)
-    "predef": [ "bento", "window", "document", "console", "localStorage", "navigator", "Image", "require", "__dirname", "Buffer"],
+    "predef": [ "bento", "window", "document", "console", "localStorage", "navigator", "Image", "require", "__dirname", "Buffer", "THREE"],
     "sub": true, // true: Tolerate using `[]` notation when it can still be expressed in dot notation,
     "laxbreak": true,  // true: Don't complain about operators placed at the beginning of the next line
     "eqnull": true   // true: Allow `x == null` to check for null || undefined

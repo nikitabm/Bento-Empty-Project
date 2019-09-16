@@ -10,12 +10,17 @@ bento.define('screens/main', [
     'bento/entity',
     'bento/eventsystem',
     'bento/gui/clickbutton',
+    'bento/gui/counter',
     'bento/gui/text',
     'bento/utils',
     'bento/screen',
     'bento/tween',
     'entities/luckykatlogo',
-    'globals'
+    'globals',
+    'entities/luckykat3d',
+    'components/sun',
+    'entities/camera360',
+    'onigiri/onigiri'
 ], function (
     Bento,
     Vector2,
@@ -25,52 +30,44 @@ bento.define('screens/main', [
     Entity,
     EventSystem,
     ClickButton,
+    Counter,
     Text,
     Utils,
     Screen,
     Tween,
     LuckyKat,
-    Globals
+    Globals,
+    LuckyKat3d,
+    Sun,
+    Camera360,
+    Onigiri
 ) {
     'use strict';
     var onShow = function () {
-        /* Screen starts here */
-        var viewport = Bento.getViewport();
-        var background = new Entity({
-            z: 0,
-            name: 'background',
-            position: new Vector2(viewport.width / 2, viewport.height / 2),
-            components: [
-                new Sprite({
-                    imageName: 'background',
-                    originRelative: new Vector2(0.5, 0.5),
-                })
-            ]
+        // --- Start Onigiri ---
+        new Onigiri({
+            backgroundColor: '#33ddff',
+            cameraFieldOfView: 45
         });
-        var clickBehavior = new Clickable({
-            onClick: function (data) {
-                // bounce the cat
-                new Tween({
-                    from: 0.5,
-                    to: 0,
-                    in: 30,
-                    ease: 'elastic',
-                    decay: 5,
-                    oscillations: 2,
-                    onUpdate: function (v, t) {
-                        luckyKat.scale.x = 1 + v;
-                        luckyKat.scale.y = 1 - v;
-                    }
-                });
-            }
+
+        // --- Some Lighting ---
+        var sun = new Sun({
+            color: '#fff',
+            directionalIntensity: 0.25,
+            ambientIntensity: 0.3,
+            targetPosition: new THREE.Vector3(-5, -10, -5)
         });
-        var luckyKat = new LuckyKat({});
+        Bento.objects.attach(sun);
 
-        // add behavior: bounce when clicking on cat
-        luckyKat.attach(clickBehavior);
+        // --- Da Lucky Kat ---
+        var luckyKat3d = LuckyKat3d({});
+        Bento.objects.attach(luckyKat3d);
 
-        Bento.objects.attach(background);
-        Bento.objects.attach(luckyKat);
+        // --- Camera ---
+        var camera360 = new Camera360({
+            target: luckyKat3d.object3D
+        });
+        Bento.objects.attach(camera360);
     };
 
     return new Screen({

@@ -8,7 +8,8 @@ bento.define('init', [
     'bento/tween',
     'bento/eventsystem',
     'utils',
-    'modules/localization'
+    'modules/localization',
+    'onigiri/onigiri'
 ], function (
     Bento,
     Vector2,
@@ -16,10 +17,33 @@ bento.define('init', [
     Tween,
     EventSystem,
     Utils,
-    Localization
+    Localization,
+    Onigiri
 ) {
     'use strict';
     return function () {
+        /**
+         * Clears screen with black every tick (android only)
+         */
+        var clearScreen = function () {
+            var canvasDimension = Bento.getViewport();
+            var clear = function (data) {
+                data.renderer.begin();
+                data.renderer.fillRect([0, 0, 0, 1], 0, 0, canvasDimension.width, canvasDimension.height);
+                data.renderer.flush();
+            };
+            if (Utils.isNativeAndroid()) {
+                EventSystem.on('preDraw', clear);
+            }
+        };
+        /**
+         * Turn off antialiasing for pixel art
+         */
+        var antiAliasing = function () {
+            if (Utils.isCocoonJS() && window.Cocoon) {
+                window.Cocoon.Utils.setAntialias(false);
+            }
+        };
         /**
          * Init localization
          */
@@ -32,15 +56,19 @@ bento.define('init', [
                 Localization.cleanUnusedAssets();
             }
         };
-        /**
-         * Input safety
-         */
-        var inputSafety = function () {
-            EventSystem.on('touchcancel', Bento.input.resetPointers);
-        };
 
+        clearScreen();
+        antiAliasing();
         initLocalization();
-        inputSafety();
+
+        // enable extensions for onigiri
+        Onigiri.addExtensions([
+            'utilities',
+            'primitives',
+            'animationmixer',
+            'billboards',
+            'particlesystem'
+        ]);
 
         /**
          * Start preloader

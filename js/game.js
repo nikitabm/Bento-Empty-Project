@@ -73,10 +73,10 @@ window.startGame = function () {
             // canvasDimension: new Rectangle(0, 0, 640, 480), // use this if responsiveResize is false
             responsiveResize: {
                 landscape: false,
-                minWidth: 180,
-                maxWidth: 240,
-                minHeight: 320, // minimum for iPad -> 240 x 320
-                maxHeight: 390, // will fill up for iPhoneX (ratio 19.5:9) -> 180 x 390
+                minWidth: 360,
+                maxWidth: 480,
+                minHeight: 640, // minimum for iPad -> 240 x 320
+                maxHeight: 780, // will fill up for iPhoneX (ratio 19.5:9) -> 180 x 390
             },
             globalMouseUp: false, // recommended true for web builds
             reload: {

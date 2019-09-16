@@ -1,4 +1,16 @@
 {
+    "3d": {
+        "fbx": {
+            "luckykat": "luckykat.fbx",
+            "textures/luckykat": "textures/luckykat.png"
+        },
+        "gltf": {
+            "luckykat.bin": "luckykat.bin",
+            "luckykat.gltf": "luckykat.gltf",
+            "luckykat.png": "luckykat.png"
+        },
+        "path": "assets/3d/"
+    },
     "main": {
         "images": {
             "background": "background.png",

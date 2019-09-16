@@ -11,6 +11,10 @@ bento.define('entities/luckykatlogo', [
     'bento/components/sprite',
     'bento/components/clickable',
     'bento/entity',
+    'bento/gui/clickbutton',
+    'bento/gui/counter',
+    'bento/gui/text',
+    'bento/eventsystem',
     'bento/utils',
     'bento/tween'
 ], function (
@@ -20,6 +24,10 @@ bento.define('entities/luckykatlogo', [
     Sprite,
     Clickable,
     Entity,
+    ClickButton,
+    Counter,
+    Text,
+    EventSystem,
     Utils,
     Tween
 ) {
