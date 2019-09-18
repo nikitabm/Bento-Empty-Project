@@ -67,7 +67,8 @@ bento.define('init', [
             'primitives',
             'animationmixer',
             'billboards',
-            'particlesystem'
+            'particlesystem',
+            'collisions'
         ]);
 
         /**
