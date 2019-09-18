@@ -32,8 +32,10 @@ bento.define('onigiri/onigiri', [
     var skyBox;
     var skyCubeMap;
 
-    //parameters
-    var cameraFieldOfView;
+    //camera parameters
+    var cameraStyle;
+    var perspectiveFieldOfView;
+    var orthographicSize;
 
     // Conversion variables
     var threeToPx = 128;
@@ -72,7 +74,9 @@ bento.define('onigiri/onigiri', [
         backgroundColor: ${1:0x70b0e4},
         // backgroundPath: 'path',
         // skyBox: ['path/positivex', 'path/negativex', 'path/positivey', 'path/negativey', 'path/positivez', 'path/negativex'],
-        cameraFieldOfView: ${2:45},
+        cameraStyle: ${2:'perspective'},
+        perspectiveFieldOfView: ${3:45},
+        orthographicSize: ${4:15},
         //gammaFactor :1,
         //gammaOutput: true
     })
@@ -117,9 +121,19 @@ bento.define('onigiri/onigiri', [
         }
 
         //setup camera
-        cameraFieldOfView = (settings.cameraFieldOfView || 45);
+        cameraStyle = settings.cameraStyle || 'perspective';
+        perspectiveFieldOfView = settings.perspectiveFieldOfView || 45;
+        orthographicSize = settings.orthographicSize || 15;
         var isLandscape = (viewport.width / viewport.height) > 1;
-        onigiriCamera = new THREE.PerspectiveCamera(cameraFieldOfView * (isLandscape ? (viewport.height / 480) : (viewport.height / 640)), viewport.width / viewport.height, 0.1, 200);
+        if (cameraStyle === 'perspective') {
+            onigiriCamera = new THREE.PerspectiveCamera(perspectiveFieldOfView * (isLandscape ? (viewport.height / 480) : (viewport.height / 640)), viewport.width / viewport.height, 0.1, 1000);
+        }
+        if (cameraStyle === 'orthographic') {
+            var aspect = viewport.width / viewport.height;
+            var width = isLandscape ? (orthographicSize) : (orthographicSize * aspect);
+            var height = isLandscape ? (orthographicSize / aspect) : (orthographicSize);
+            onigiriCamera = new THREE.OrthographicCamera(-width * 0.5, width * 0.5, height * 0.5, -height * 0.5, 0.1, 1000);
+        }
 
         // set up scene
         onigiriScene = new THREE.Scene();
@@ -170,9 +184,20 @@ bento.define('onigiri/onigiri', [
 
         var updateCamera = function () {
             viewport = Bento.getViewport();
-            var isLandscape = (viewport.width / viewport.height) > 1;
-            onigiriCamera.fov = cameraFieldOfView * (isLandscape ? (viewport.height / 240) : (viewport.height / 320));
-            onigiriCamera.aspect = viewport.width / viewport.height;
+            var thisAspect = viewport.width / viewport.height;
+            isLandscape = thisAspect > 1;
+            if (cameraStyle === 'perspective') {
+                onigiriCamera.fov = perspectiveFieldOfView * (isLandscape ? (viewport.height / 480) : (viewport.height / 640));
+                onigiriCamera.aspect = viewport.width / viewport.height;
+            }
+            if (cameraStyle === 'orthographic') {
+                var thisWidth = isLandscape ? (orthographicSize) : (orthographicSize * thisAspect);
+                var thisHeight = isLandscape ? (orthographicSize / thisAspect) : (orthographicSize);
+                onigiriCamera.left = -thisWidth * 0.5;
+                onigiriCamera.right = thisWidth * 0.5;
+                onigiriCamera.top = thisHeight * 0.5;
+                onigiriCamera.bottom = -thisHeight * 0.5;
+            }
             onigiriCamera.updateProjectionMatrix();
         };
 
@@ -205,16 +230,16 @@ bento.define('onigiri/onigiri', [
                     onigiriCamera.position.x -= 0.1;
                 }
                 if (Bento.input.isKeyDown('s')) {
-                    onigiriCamera.position.y += 0.1;
-                }
-                if (Bento.input.isKeyDown('w')) {
                     onigiriCamera.position.y -= 0.1;
                 }
+                if (Bento.input.isKeyDown('w')) {
+                    onigiriCamera.position.y += 0.1;
+                }
                 if (Bento.input.isKeyDown('f')) {
-                    onigiriCamera.position.z += 0.1;
+                    onigiriCamera.position.z -= 0.1;
                 }
                 if (Bento.input.isKeyDown('r')) {
-                    onigiriCamera.position.z -= 0.1;
+                    onigiriCamera.position.z += 0.1;
                 }
                 if (Bento.input.isKeyDown('up')) {
                     onigiriCamera.rotation.x += 0.01;
