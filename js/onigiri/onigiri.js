@@ -19,6 +19,7 @@ bento.define('onigiri/onigiri', [
 ) {
     'use strict';
     // THREE object references
+    var onigiriRenderer = null;
     var onigiriScene = null;
     var onigiriCamera = null;
     var onigiriEntity = null;
@@ -87,29 +88,10 @@ bento.define('onigiri/onigiri', [
 
         // get references
         var viewport = Bento.getViewport();
+        var ThreeData = Bento.getRenderer().three;
 
-        // create a Three renderer
-        if (THREE.currentRenderer) {
-            // somehow initiailzing with an existing renderer, probably from a hot reload
-            // remove existing entities
-            Bento.objects.get('onigiri', function (onigiri) {
-                Bento.objects.remove(onigiri);
-            });
-        } else {
-            THREE.currentRenderer = new THREE.WebGLRenderer({ // DON'T TOUCH UNLESS YOU KNOW WHAT YOU'RE DOING!
-                context: Bento.getRenderer().getContext(),
-                // antialias: true,
-                powerPreference: 'low-power',
-                /* https://developer.mozilla.org/en-US/docs/Web/API/WebGL_API/WebGL_best_practices
-                 * Using highp precision in fragment shaders will prevent your content from working on some older mobile hardware.
-                 * You can use mediump instead, but be aware that this often results in corrupted rendering due to lack of precision
-                 * on most mobile devices, and the corruption is not going to be visible on a typical desktop computer.
-                 */
-                precision: 'highp',
-                /* if highp is not feasible use logarithmicDepthBuffer to resolve scaling issues */
-                // logarithmicDepthBuffer: true
-            });
-        }
+        // collect the three renderer
+        onigiriRenderer = ThreeData.renderer;
 
         // set up conversion variables
         if (settings.threeToPx) {
@@ -139,6 +121,8 @@ bento.define('onigiri/onigiri', [
         onigiriScene = new THREE.Scene();
         onigiriScene.add(onigiriCamera); // this is needed to attach stuff to the camera
         onigiriScene.add(onigiriClickCasterMesh); // needed for clickable3D
+        ThreeData.sceneList.push([onigiriScene, onigiriCamera]);
+
 
         // fog
         if (settings.fogColor && settings.fog) {
@@ -155,8 +139,8 @@ bento.define('onigiri/onigiri', [
         }
 
         // set gamma
-        THREE.currentRenderer.gammaFactor = settings.gammaFactor || 1;
-        THREE.currentRenderer.gammaOutput = settings.gammaOutput || false;
+        onigiriRenderer.gammaFactor = settings.gammaFactor || 1;
+        onigiriRenderer.gammaOutput = settings.gammaOutput || false;
 
         // Add support for retina displays CAUTION: setting this has actually broken the resolution on devices
         // renderer.setPixelRatio(window.devicePixelRatio);
@@ -165,15 +149,14 @@ bento.define('onigiri/onigiri', [
         // renderer.setSize(gl.canvas.width, gl.canvas.height);
 
         // TODO: SHADOWS
-        // renderer.shadowMap.enabled = true;
-        // renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-        // renderer.shadowMap.autoUpdate = false;
-        // renderer.shadowMap.needsUpdate = true; // when your scene changes
+        // onigiriRenderer.shadowMap.enabled = true;
+        // onigiriRenderer.shadowMap.autoUpdate = true;
+        //onigiriRenderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
 
         // Little function to toggle debug mode
         var printDebug = function () {
-            console.log('THREE Info:\nMemory: ' + JSON.stringify(THREE.currentRenderer.info.memory) +
+            console.log('THREE Info:\nMemory: ' + JSON.stringify(ThreeData.renderer.info.memory) +
                 '\nObjects: ' + onigiriScene.children.length +
                 '\nCamera:' + JSON.stringify({
                     position: Onigiri.camera.position,
@@ -255,30 +238,30 @@ bento.define('onigiri/onigiri', [
                 }
             },
             preDraw: function (data) {
-                var pixiRenderer = data.renderer.getPixiRenderer();
-                var gl = data.renderer.getContext();
+                // var pixiRenderer = data.renderer.getPixiRenderer();
+                // var gl = data.renderer.getContext();
 
                 // THREE rendering
-                THREE.currentRenderer.state.reset();
-                THREE.currentRenderer.render(onigiriScene, onigiriCamera);
+                // THREE.currentRenderer.state.reset();
+                //THREE.currentRenderer.render(onigiriScene, onigiriCamera);
 
-                // We need to reset WebGL state
-                // to PIXI's needs.
+                // // We need to reset WebGL state
+                // // to PIXI's needs.
 
-                gl.disableVertexAttribArray(3);
-                gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
-                gl.disable(gl.SCISSOR_TEST);
-                gl.disable(gl.CULL_FACE);
-                gl.disable(gl.DEPTH_TEST);
-                gl.enable(gl.BLEND);
-                gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, false);
-                pixiRenderer.shaderManager._currentId = -1;
+                // gl.disableVertexAttribArray(3);
+                // gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
+                // gl.disable(gl.SCISSOR_TEST);
+                // gl.disable(gl.CULL_FACE);
+                // gl.disable(gl.DEPTH_TEST);
+                // gl.enable(gl.BLEND);
+                // gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, false);
+                // pixiRenderer.shaderManager._currentId = -1;
 
-                // gl.renderer.shaderManager.setShader(gl.renderer.shaderManager.defaultShader);
-                // gl.renderer.shaderManager.setShader(gl.renderer.shaderManager.primitiveShader);
+                // // gl.renderer.shaderManager.setShader(gl.renderer.shaderManager.defaultShader);
+                // // gl.renderer.shaderManager.setShader(gl.renderer.shaderManager.primitiveShader);
 
-                pixiRenderer.shaderManager.setShader(pixiRenderer.shaderManager.complexPrimitiveShader);
-                gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
+                // pixiRenderer.shaderManager.setShader(pixiRenderer.shaderManager.complexPrimitiveShader);
+                // gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
             },
         });
 
@@ -350,7 +333,7 @@ bento.define('onigiri/onigiri', [
     */
     Object.defineProperty(Onigiri, 'renderer', {
         get: function () {
-            return THREE.currentRenderer;
+            return onigiriRenderer;
         },
         set: function (value) {
             Utils.log("Onigiri: 'Onigiri.renderer' is read only!");
@@ -465,6 +448,7 @@ bento.define('onigiri/onigiri', [
         var euler = settings.euler || new THREE.Euler(0, 0, 0);
         var scale = settings.scale || new THREE.Vector3(1, 1, 1);
         var object3D = settings.object3D || new THREE.Object3D({});
+        var components = settings.components || [];
 
         // --- Vars ---
         var parent = null;
@@ -499,12 +483,12 @@ bento.define('onigiri/onigiri', [
                 }
             }
         };
+        components.unshift(threeBehaviour); // threeBehaviour is top priority
 
         // --- Entity ---
         var entity3D = new Entity({
             name: settings.name,
-            family: settings.family,
-            components: [threeBehaviour].concat(settings.components || [])
+            family: settings.family
         });
 
         // --- Post Setup ---
@@ -512,6 +496,8 @@ bento.define('onigiri/onigiri', [
         object3D.position.set(position.x, position.y, position.z);
         object3D.rotation.set(euler.x, euler.y, euler.z, euler.order);
         object3D.scale.set(scale.x, scale.y, scale.z);
+        object3D.castShadow = true;
+        object3D.recieveShadow = true;
 
         // Directly put a reference to the entity3D in the object3D. this is the object3D
         object3D.entity3D = entity3D;
@@ -563,6 +549,10 @@ bento.define('onigiri/onigiri', [
             set: function (newScale) {
                 object3D.scale.set(newScale);
             }
+        });
+
+        Utils.forEach(components, function (component, i, l, breakLoop) {
+            entity3D.attach(component);
         });
 
         return entity3D;
@@ -620,6 +610,13 @@ bento.define('onigiri/onigiri', [
         var targetObject = new THREE.Object3D();
         targetObject.position.set(targetPosition.x, targetPosition.y, targetPosition.z);
         lightObject.target = targetObject;
+
+        // lightObject.castShadow = true;
+        // lightObject.shadow.mapSize.width = 512; // default
+        // lightObject.shadow.mapSize.height = 512; // default
+        // lightObject.shadow.camera.near = 0.5; // default
+        // lightObject.shadow.camera.far = 500; // default
+
         //group to hold both
         var lightGroup = new THREE.Group();
         lightGroup.add(lightObject);
