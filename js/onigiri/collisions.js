@@ -251,4 +251,6 @@ collidesWith({
             shape: sphere || new THREE.Sphere()
         });
     };
+    console.log("Onigiri: added Onigiri.BoxCollider");
+    console.log("Onigiri: added Onigiri.SphereCollider");
 });
