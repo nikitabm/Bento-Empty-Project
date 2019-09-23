@@ -62,7 +62,7 @@ window.startGame = function () {
         Bento.setup({
             name: 'Empty Project',
             canvasId: 'canvas',
-            renderer: Utils.isCocoonJs() ? 'canvas2d' : 'pixi',
+            renderer: 'three',
             pixelSize: 3, // additional scaling
             antiAlias: false,
             useDeltaT: false,
