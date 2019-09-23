@@ -1,36 +1,20 @@
 bento.define('onigiri/collisions', [
     'bento',
     'bento/math/vector2',
-    'bento/math/rectangle',
-    'bento/components/sprite',
-    'bento/components/clickable',
-    'bento/entity',
     'bento/eventsystem',
-    'bento/gui/clickbutton',
-    'bento/gui/counter',
-    'bento/gui/text',
     'bento/utils',
-    'bento/tween',
     'onigiri/onigiri'
 ], function (
     Bento,
     Vector2,
-    Rectangle,
-    Sprite,
-    Clickable,
-    Entity,
     EventSystem,
-    ClickButton,
-    Counter,
-    Text,
     Utils,
-    Tween,
     Onigiri
 ) {
     'use strict';
     var debug = true;
 
-    // collider types are derived from this
+    // class isn't externally accessible - should it be?
     var Collider = function (settings) {
         // --- Parameters ---
         var type = settings.type;
@@ -39,58 +23,11 @@ bento.define('onigiri/collisions', [
         // --- Variables ---
         var parent;
         var helper;
+        var checkedThisFrame = false;
         var collidedThisFrame = false;
         var uncollidedColor;
 
         // --- Functions ---
-        /**
-     * Onigiri equivelant to entity.getBoundingBox returning a world scaled and translated Three Math shape 
-     * @function
-     * @instance
-     * @param {THREE.Vector3} [offset] - An offset in world units that the shape will be moved by
-     * @name collidesWith
-     * @snippet #Collider.getShape|Entity/Array
-getShape(new THREE.THREE.Vector3(0, 0, 0))
-     * @returns {Sphere/Box} The scaled and translated Mathematical shape
-     */
-        var getShape = function (offset) {
-            //set default for offset
-            offset = offset || new THREE.Vector3(0, 0, 0);
-
-            // copy the base shape
-            var transformedShape = shape.clone();
-
-            // get transforms
-            var position = new THREE.Vector3(0, 0, 0);
-            var scale = new THREE.Vector3(1, 1, 1);
-            if (parent) {
-                if (parent.object3D) {
-                    parent.object3D.getWorldPosition(position);
-                    parent.object3D.getWorldScale(scale);
-                }
-            }
-
-            switch (type) {
-            case 'box':
-                transformedShape.min.multiply(scale);
-                transformedShape.max.multiply(scale);
-                transformedShape.translate(position);
-                if (helper) {
-                    helper.box.min = transformedShape.min;
-                    helper.box.max = transformedShape.max;
-                }
-                break;
-            case 'sphere':
-                transformedShape.radius *= Math.max(scale.x, scale.y);
-                transformedShape.translate(position);
-                if (helper) {
-                    transformedShape.getBoundingBox(helper.box);
-                }
-                break;
-            }
-            return transformedShape;
-        };
-
         //checks if this collder intersects another collider
         var intersects = function (otherCollider, offset) {
             var didCollide = false;
@@ -107,6 +44,82 @@ getShape(new THREE.THREE.Vector3(0, 0, 0))
             } else {
                 return null;
             }
+        };
+
+        // sets collider.shape based on the geometry of a specific object3D
+        var generateShapeFromObject3D = function (object3D) {
+            if (object3D && object3D.geometry) {
+                // derive bounds from the geometry
+                switch (type) {
+                case 'box':
+                    object3D.geometry.computeBoundingBox();
+                    collider.shape = object3D.geometry.boundingBox.clone();
+                    break;
+                case 'sphere':
+                    object3D.geometry.computeBoundingSphere();
+                    collider.shape = object3D.geometry.boundingSphere.clone();
+                }
+            } else {
+                // we have no geometry so default to the standards from THREE
+                switch (type) {
+                case 'box':
+                    collider.shape = new THREE.Box3();
+                    break;
+                case 'sphere':
+                    collider.shape = new THREE.Sphere();
+                    break;
+                }
+                console.log('Onigiri:  No detected geometry for collider generation - Using default for ' + type);
+            }
+        };
+        /**
+     * Onigiri equivelant to entity.getBoundingBox returning a world scaled and translated Three Math shape 
+     * @function
+     * @instance
+     * @param {THREE.Vector3} [offset] - An offset in world units that the shape will be moved by
+     * @name collidesWith
+     * @snippet #Collider.getShape|Entity/Array
+getShape(new THREE.THREE.Vector3(0, 0, 0))
+     * @returns {Sphere/Box} The scaled and translated Mathematical shape
+     */
+        var getShape = function (offset) {
+            //set default for offset
+            offset = offset || new THREE.Vector3(0, 0, 0);
+
+            // copy the base shape
+            var transformedShape = collider.shape.clone();
+
+            // get transforms
+            var position = new THREE.Vector3(0, 0, 0);
+            var scale = new THREE.Vector3(1, 1, 1);
+            if (parent) {
+                if (parent.object3D) {
+                    parent.object3D.getWorldPosition(position);
+                    parent.object3D.getWorldScale(scale);
+                }
+            }
+
+            switch (type) {
+            case 'box':
+                transformedShape.min.multiply(scale);
+                transformedShape.max.multiply(scale);
+                transformedShape.translate(position);
+                transformedShape.translate(offset);
+                if (helper) {
+                    helper.box.min = transformedShape.min;
+                    helper.box.max = transformedShape.max;
+                }
+                break;
+            case 'sphere':
+                transformedShape.radius *= Math.max(scale.x, scale.y);
+                transformedShape.translate(position);
+                transformedShape.translate(offset);
+                if (helper) {
+                    transformedShape.getBoundingBox(helper.box);
+                }
+                break;
+            }
+            return transformedShape;
         };
 
         /**
@@ -144,6 +157,10 @@ collidesWith({
             var onCollide = params.onCollide;
             var intersectedColliders = [];
 
+            //debug
+            checkedThisFrame = true;
+
+            //checks this collider
             var checkCollision = function (otherCollider) {
                 if (ignoreSelf && otherCollider.parent && collider.parent && collider.parent.id === otherCollider.parent.id) {
                     return null; // ignore self if we need to
@@ -157,9 +174,11 @@ collidesWith({
                 }
                 return collisionResult;
             };
+            //loops an array of entities and tries colliding with them all
             var loopEntityArray = function (entityArray) {
-                Utils.forEach(entityArray, function (entity, i, l, breakLoop) {
-                    if (checkCollision(entity.getComponent('collider'))) {
+                Utils.forEach(entityArray, function (thisEntity, i, l, breakLoop) {
+                    var thisCollider = thisEntity.getComponent('collider');
+                    if (thisCollider && checkCollision(thisCollider)) {
                         if (firstOnly) {
                             breakLoop();
                         }
@@ -167,10 +186,11 @@ collidesWith({
                 });
             };
 
+            // try from params
             if (params.entity) { // a specific entity
                 checkCollision(params.entity.getComponent('collider'));
-            } else if (params.entities) { // an array of entities
-                loopEntityArray(params.entities && params.entities.length > 0);
+            } else if (params.entities && params.entities.length > 0) { // an array of entities
+                loopEntityArray(params.entities);
             } else if (params.family && params.family.length > 0) { // a family
                 loopEntityArray(Bento.objects.getByFamily(params.family));
             }
@@ -180,7 +200,6 @@ collidesWith({
             } else {
                 return null;
             }
-
         };
 
         var collider = {
@@ -189,6 +208,11 @@ collidesWith({
             shape: shape,
             onParentAttached: function (data) {
                 parent = data.entity;
+
+                //auto generate shape from mesh if not supplied
+                if (parent && parent.object3D && !this.shape) {
+                    generateShapeFromObject3D(parent.object3D);
+                }
             },
             start: function () {
                 if (helper) {
@@ -204,13 +228,17 @@ collidesWith({
             },
             postUpdate: function (data) {
                 if (helper) {
+                    getShape();
                     if (collidedThisFrame) {
                         helper.material.color = new THREE.Color(0xff0000);
                     } else {
                         helper.material.color = new THREE.Color(uncollidedColor);
                     }
+                    if (!checkedThisFrame) {
+                        helper.box.translate(new THREE.Vector3(0, 0, 100000));
+                    }
                     collidedThisFrame = false;
-                    getShape();
+                    checkedThisFrame = false;
                 }
             },
             getShape: getShape,
@@ -233,24 +261,27 @@ collidesWith({
         return collider;
     };
 
-    /* @snippet BoxCollider - Onigiri
+    /* Makes a Box Collider Component, if a box isn't supplied it will be generated from the geometry of the entity3D it is attached to
+    @snippet BoxCollider - Onigiri
     Onigiri.BoxCollider(new THREE.Box3(min, max));
     */
     Onigiri.BoxCollider = function (box) {
         return new Collider({
             type: 'box',
-            shape: box || new THREE.Box3()
+            shape: box // if i am null i will be generated from the geometry
         });
     };
-    /* @snippet SphereCollider - Onigiri
+    /* Makes a Sphere Collider Component, if a box isn't supplied it will be generated from the geometry of the entity3D it is attached to
+    @snippet SphereCollider - Onigiri
         Onigiri.SphereCollider(new THREE.Sphere(center, radius));
         */
     Onigiri.SphereCollider = function (sphere) {
         return new Collider({
             type: 'sphere',
-            shape: sphere || new THREE.Sphere()
+            shape: sphere // if i am null i will be generated from the geometry
         });
     };
     console.log("Onigiri: added Onigiri.BoxCollider");
     console.log("Onigiri: added Onigiri.SphereCollider");
+    //TODO: Investigate possible usage of Seperating Axis Theorum for versatile collisions - Perhaps just leave this to a physics engine
 });
