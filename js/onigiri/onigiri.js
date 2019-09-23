@@ -16,6 +16,9 @@ bento.define('onigiri/onigiri', [
     Clickable
 ) {
     'use strict';
+    var VERSION = "v1.0.0";
+
+
     // THREE object references
     var onigiriRenderer = null;
     var onigiriScene = null;
@@ -147,9 +150,9 @@ bento.define('onigiri/onigiri', [
         //renderer.setSize(gl.canvas.width, gl.canvas.height);
 
         // TODO: SHADOWS
-        // onigiriRenderer.shadowMap.enabled = true;
-        // onigiriRenderer.shadowMap.autoUpdate = true;
-        // onigiriRenderer.shadowMap.type = THREE.PCFSoftShadowMap;
+        onigiriRenderer.shadowMap.enabled = true;
+        onigiriRenderer.shadowMap.autoUpdate = true;
+        onigiriRenderer.shadowMap.type = THREE.VSMShadowMap;
 
         // Little function to toggle debug mode
         var printDebug = function () {
@@ -465,8 +468,24 @@ bento.define('onigiri/onigiri', [
         object3D.position.set(position.x, position.y, position.z);
         object3D.rotation.set(euler.x, euler.y, euler.z, euler.order);
         object3D.scale.set(scale.x, scale.y, scale.z);
+
+        //enabled shadows
         object3D.castShadow = true;
-        object3D.recieveShadow = true;
+        object3D.receiveShadow = true;
+
+        // do the same for all the children
+        var enableShadowsForChildren = function (o3D) {
+            if (o3D.children && o3D.children.length > 0) {
+                Utils.forEach(o3D.children, function (child, i, l, breakLoop) {
+                    if (child.type !== 'AmbientLight') { // not AmbientLights
+                        child.castShadow = true;
+                        child.receiveShadow = true;
+                    }
+                    enableShadowsForChildren(child);
+                });
+            }
+        };
+        enableShadowsForChildren(object3D);
 
         // Directly put a reference to the entity3D in the object3D. this is the object3D
         object3D.entity3D = entity3D;
@@ -692,15 +711,20 @@ bento.define('onigiri/onigiri', [
 
     /* 
     * Used to 'install' extensions into Onigiri, allowing you to perform 'Onigiri.ExtensionName({})' instead of defining everything in the require of the file
-    * @snippet Onigiri.addExtensions.snippet
-    Onigiri.addExtensions([
+    * @snippet Onigiri.setup.snippet
+    Onigiri.setup([
         'onigiri/primitive'
     ]); 
     */
-    Onigiri.addExtensions = function (extensionNames) {
+    Onigiri.setup = function (extensionNames) {
+        console.log("********************");
+        console.log("Onigiri " + VERSION);
+        console.log("Adding Extensions: ", extensionNames);
+        console.log("********************");
         Utils.forEach(extensionNames, function (extensionName, i, l, breakLoop) {
             bento.require(['onigiri/' + extensionName], function (Extension) {});
         });
+
     };
 
     /* @snippet THREE.Vector2 - Onigiri
@@ -723,6 +747,5 @@ bento.define('onigiri/onigiri', [
         blending: THREE.NormalBlending
     })
     */
-
     return Onigiri;
 });

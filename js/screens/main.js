@@ -53,11 +53,29 @@ bento.define('screens/main', [
         // --- Some Lighting ---
         var sun = new Sun({
             color: '#fff',
-            directionalIntensity: 0.25,
-            ambientIntensity: 0.3,
-            targetPosition: new THREE.Vector3(-5, -10, -5)
+            directionalIntensity: 0.2,
+            ambientIntensity: 0.8,
+            position: new THREE.Vector3(5, 10, 5)
         });
         Bento.objects.attach(sun);
+
+        // --- Infinite Floor Plane ---
+        var floor = new Onigiri.Primitive({
+            shape: 'plane',
+            position: new THREE.Vector3(0, -0.2, 0),
+            euler: new THREE.Euler(-Math.PI * 0.5, 0, 0),
+            material: new THREE.MeshPhongMaterial({
+                color: 0xe0f9ff,
+                shininess: 100,
+                side: THREE.FrontSide,
+                blending: THREE.NormalBlending
+            }),
+            parameters: [
+                10000,
+                10000
+            ]
+        });
+        Bento.objects.attach(floor);
 
         // --- Da Lucky Kat ---
         var luckyKat3d = LuckyKat3d({});

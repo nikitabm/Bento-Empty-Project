@@ -62,7 +62,7 @@ bento.define('init', [
         initLocalization();
 
         // enable extensions for onigiri
-        Onigiri.addExtensions([
+        Onigiri.setup([
             'utilities',
             'primitives',
             'animationmixer',

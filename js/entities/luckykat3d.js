@@ -35,6 +35,7 @@ bento.define('entities/luckykat3d', [
     return function (settings) {
         // --- Variables ---
         var mesh = Onigiri.getMesh('luckykat');
+        mesh.children[1].material.emissiveIntensity = 0; // why is this enabled by default?
 
         // --- Components ---
         var controls = new Onigiri.ClickCaster({
@@ -73,6 +74,7 @@ bento.define('entities/luckykat3d', [
                 controls
             ]
         });
+
         return entity;
     };
 });
