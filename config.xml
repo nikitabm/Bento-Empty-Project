@@ -82,6 +82,10 @@
         <resource-file src="res/android/mipmap-xxhdpi-v26/ic_launcher_background.png" target="app/src/main/res/mipmap-xxhdpi-v26/ic_launcher_background.png" />
         <resource-file src="res/android/mipmap-xxxhdpi-v26/ic_launcher_foreground.png" target="app/src/main/res/mipmap-xxxhdpi-v26/ic_launcher_foreground.png" />
         <resource-file src="res/android/mipmap-xxxhdpi-v26/ic_launcher_background.png" target="app/src/main/res/mipmap-xxxhdpi-v26/ic_launcher_background.png" />
+        <resource-file src="res/android/values/styles.xml" target="app/src/main/res/values/styles.xml" />
+        <edit-config file="AndroidManifest.xml" mode="merge" target="/manifest/application/activity">
+            <activity android:theme="@style/FullScreen" />
+        </edit-config>
     </platform>
 
     <!-- Settings -->
