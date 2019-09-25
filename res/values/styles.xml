@@ -1,5 +1,5 @@
 <resources>
-<style name="ActivityTheme">
+<style name="FullScreen">
     <item name="android:windowLayoutInDisplayCutoutMode">shortEdges</item>
     <item name="android:windowNoTitle">true</item>
     <item name="android:windowActionBar">false</item>
