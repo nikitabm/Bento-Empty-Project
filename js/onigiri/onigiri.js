@@ -718,7 +718,7 @@ bento.define('onigiri/onigiri', [
     */
     Onigiri.setup = function (extensionNames) {
         console.log("********************");
-        console.log("Onigiri " + VERSION);
+        console.log("Onigiri 🍙 " + VERSION);
         console.log("Adding Extensions: ", extensionNames);
         console.log("********************");
         Utils.forEach(extensionNames, function (extensionName, i, l, breakLoop) {
