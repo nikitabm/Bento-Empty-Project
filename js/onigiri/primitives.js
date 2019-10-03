@@ -140,7 +140,9 @@ Onigiri.Primitive({
     ],
     // material : undefined,
     // disposeGeometry : true,
-    // disposeMaterial : true
+    // disposeMaterial : true,
+    // castShadow: true,
+    // receiveShadow: true
 });
      */
     Onigiri.Primitive = function (settings) {
@@ -153,6 +155,7 @@ Onigiri.Primitive({
             settings.parameters[5],
             settings.parameters[6]
         );
+        geometry.computeVertexNormals();
         var material = settings.material || new THREE.MeshBasicMaterial({
             color: 0xFF00FF,
         });
@@ -170,6 +173,8 @@ Onigiri.Primitive({
             scale: settings.scale,
             disposeGeometry: Utils.getDefault(settings.disposeGeometry, true),
             disposeMaterial: Utils.getDefault(settings.disposeMaterial, true),
+            castShadow: Utils.getDefault(settings.castShadow, false),
+            receiveShadow: Utils.getDefault(settings.receiveShadow, false),
             components: settings.components
         });
         return meshEntity;

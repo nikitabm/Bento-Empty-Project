@@ -16,7 +16,7 @@ bento.define('onigiri/onigiri', [
     Clickable
 ) {
     'use strict';
-    var VERSION = "v1.0.0";
+    var VERSION = "v1.0.1";
 
 
     // THREE object references
@@ -117,6 +117,8 @@ bento.define('onigiri/onigiri', [
             var height = isLandscape ? (orthographicSize / aspect) : (orthographicSize);
             onigiriCamera = new THREE.OrthographicCamera(-width * 0.5, width * 0.5, height * 0.5, -height * 0.5, 0.1, 1000);
         }
+        //Custom Value pertaining to the camera frustrum
+        onigiriCamera.frustum = new THREE.Frustum();
 
         // set up scene
         onigiriScene = new THREE.Scene();
@@ -152,7 +154,7 @@ bento.define('onigiri/onigiri', [
         // TODO: SHADOWS
         onigiriRenderer.shadowMap.enabled = true;
         onigiriRenderer.shadowMap.autoUpdate = true;
-        onigiriRenderer.shadowMap.type = THREE.VSMShadowMap;
+        onigiriRenderer.shadowMap.type = THREE.PCFShadowMap;
 
         // Little function to toggle debug mode
         var printDebug = function () {
@@ -204,6 +206,10 @@ bento.define('onigiri/onigiri', [
                 }
             },
             update: function (data) {
+                //update camera frustum
+                Onigiri.camera.frustum.setFromMatrix(new THREE.Matrix4().multiplyMatrices(Onigiri.camera.projectionMatrix, Onigiri.camera.matrixWorldInverse));
+
+                //camera controls
                 if (Bento.input.isKeyDown('d')) {
                     onigiriCamera.position.x += 0.1;
                 }
@@ -410,8 +416,10 @@ bento.define('onigiri/onigiri', [
         euler: new THREE.Euler(0, 0, 0),
         scale: new THREE.Vector3(1, 1, 1),
         // disposeGeometry : true,
-        // disposeMaterial : true
-        components: []
+        // disposeMaterial : true,
+        // castShadow: true,
+        // receiveShadow: true
+        // components: []
     })
     */
     Onigiri.Entity3D = function (settings) {
@@ -440,17 +448,20 @@ bento.define('onigiri/onigiri', [
                 }
             },
             onParentRemoved: function (data) {
-                if (object3D && object3D.parent) {
-                    parent.remove(object3D);
-                    parent = null;
-
-                    //clean up material
-                    if (this.disposeMaterial && object3D.material) {
-                        object3D.material.dispose();
-                    }
-                    //clean up geometry
-                    if (this.disposeGeometry) {
-                        Onigiri.cleanObject3d(object3D);
+                if (object3D) {
+                    //clean up junk
+                    object3D.traverse(function (obj3D) {
+                        if (threeBehaviour.disposeGeometry && obj3D.geometry) {
+                            obj3D.geometry.dispose();
+                        }
+                        if (threeBehaviour.disposeMaterial && obj3D.material) {
+                            obj3D.material.dispose();
+                        }
+                    });
+                    //get rid of self
+                    if (parent) {
+                        parent.remove(object3D);
+                        parent = null;
                     }
                 }
             }
@@ -469,23 +480,13 @@ bento.define('onigiri/onigiri', [
         object3D.rotation.set(euler.x, euler.y, euler.z, euler.order);
         object3D.scale.set(scale.x, scale.y, scale.z);
 
-        //enabled shadows
-        object3D.castShadow = true;
-        object3D.receiveShadow = true;
-
-        // do the same for all the children
-        var enableShadowsForChildren = function (o3D) {
-            if (o3D.children && o3D.children.length > 0) {
-                Utils.forEach(o3D.children, function (child, i, l, breakLoop) {
-                    if (child.type !== 'AmbientLight') { // not AmbientLights
-                        child.castShadow = true;
-                        child.receiveShadow = true;
-                    }
-                    enableShadowsForChildren(child);
-                });
+        //set shadows
+        object3D.traverse(function (o3D) {
+            if (o3D.type !== 'AmbientLight') { // not AmbientLights
+                o3D.castShadow = Utils.getDefault(settings.castShadow, false);
+                o3D.receiveShadow = Utils.getDefault(settings.receiveShadow, false);
             }
-        };
-        enableShadowsForChildren(object3D);
+        });
 
         // Directly put a reference to the entity3D in the object3D. this is the object3D
         object3D.entity3D = entity3D;
@@ -506,7 +507,9 @@ bento.define('onigiri/onigiri', [
                 return entity3D.object3D.visible;
             },
             set: function (newVisible) {
-                entity3D.object3D.visible = newVisible;
+                entity3D.object3D.traverse(function (o3D) {
+                    o3D.visible = newVisible;
+                });
             }
         });
 
@@ -516,7 +519,7 @@ bento.define('onigiri/onigiri', [
                 return object3D.position;
             },
             set: function (newPosition) {
-                object3D.position.set(newPosition);
+                object3D.position.set(newPosition.x, newPosition.y, newPosition.z);
             }
         });
         // expose euler rotation of the object3D
@@ -525,7 +528,7 @@ bento.define('onigiri/onigiri', [
                 return object3D.rotation;
             },
             set: function (newEuler) {
-                object3D.rotation.set(newEuler);
+                object3D.rotation.set(newEuler.x, newEuler.y, newEuler.z);
             }
         });
         // TODO: QUATERNION ROTATION
@@ -552,7 +555,9 @@ bento.define('onigiri/onigiri', [
         mesh: '${1}', // direct mesh reference
         position: new THREE.Vector3(0, 0, 0),
         // disposeGeometry : true,
-        // disposeMaterial : true
+        // disposeMaterial : true,
+        // castShadow: true,
+        // receiveShadow: true
     })
     */
     Onigiri.Mesh = function (settings) {
@@ -569,6 +574,8 @@ bento.define('onigiri/onigiri', [
             object3D: mesh,
             disposeGeometry: settings.disposeGeometry,
             disposeMaterial: settings.disposeMaterial,
+            castShadow: settings.castShadow,
+            receiveShadow: settings.receiveShadow,
             components: settings.components
         });
         return meshEntity;
