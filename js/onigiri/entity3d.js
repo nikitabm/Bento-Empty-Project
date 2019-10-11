@@ -103,12 +103,12 @@ bento.define('onigiri/entity3d', [
         object3D.scale.set(scale.x, scale.y, scale.z);
 
         // set shadows
-        object3D.traverse(function (o3D) {
-            if (o3D.type !== 'AmbientLight') { // not AmbientLights
+        if (settings.castShadow || settings.receiveShadow) {
+            object3D.traverse(function (o3D) {
                 o3D.castShadow = Utils.getDefault(settings.castShadow, false);
                 o3D.receiveShadow = Utils.getDefault(settings.receiveShadow, false);
-            }
-        });
+            });            
+        }
 
         // Directly put a reference to the entity3D in the object3D. this is the object3D
         object3D.entity3D = entity3D;
