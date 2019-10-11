@@ -45,10 +45,11 @@ bento.define('screens/main', [
     'use strict';
     var onShow = function () {
         // --- Start Onigiri ---
-        new Onigiri({
+        var onigiri = new Onigiri({
             backgroundColor: '#33ddff',
             cameraFieldOfView: 45
         });
+        Bento.objects.attach(onigiri);
 
         // --- Some Lighting ---
         var sun = new Sun({

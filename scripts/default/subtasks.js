@@ -140,6 +140,9 @@ function collectLoop() {
         'assets/**/*.json',
         'assets/**/*.png',
         'assets/**/*.ttf',
+        'assets/**/*.fbx',
+        'assets/**/*.gltf',
+        'assets/**/*.bin',
         '!assets/**/*.tmp',
         '!assets/**/*.json.*',
         '!assets/*.json',
@@ -162,9 +165,13 @@ function collectLoop() {
             var baseName = folders[0];
             var assetName;
             var asset;
-            var collectSimple = function (type) {
+            var collectSimple = function (type, useExtension) {
                 asset = filePath.replace(path.join(baseName, type) + path.sep, '');
-                assetName = asset.split('.')[0];
+                if (!useExtension) {
+                    assetName = asset.split('.')[0];
+                } else {
+                    assetName = asset;
+                }
 
                 if (isWin) {
                     asset = asset.replace(/\\/g, '/');
@@ -217,6 +224,10 @@ function collectLoop() {
                 collectSimple('fonts');
             } else if (folders[1] === 'spritesheets') {
                 collectSimple('spritesheets');
+            } else if (folders[1] === 'fbx') {
+                collectSimple('fbx');
+            } else if (folders[1] === 'gltf') {
+                collectSimple('gltf', true);
             } else {
                 // binary?
             }
@@ -294,6 +305,9 @@ function copyToWww() {
         'assets/**/*.json',
         'assets/**/*.png',
         'assets/**/*.ttf',
+        'assets/**/*.fbx',
+        'assets/**/*.gltf',
+        'assets/**/*.bin',
         './lib/**/*',
         './index.html',
         './assets.json',
@@ -385,7 +399,7 @@ function replaceWebInWww() {
 
 function uglifyWww(callback) {
     var pump = require('pump');
-    var uglify = require('gulp-uglify');
+    var uglify = require('gulp-uglify-es').default;
     pump([
         gulp.src([
             './www/js/**/*.js'

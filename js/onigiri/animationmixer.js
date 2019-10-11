@@ -1,3 +1,7 @@
+/**
+ * Animation mixer
+ * @moduleName AnimationMixer
+ */
 bento.define('onigiri/animationmixer', [
     'bento/utils',
     'onigiri/onigiri'
@@ -6,12 +10,13 @@ bento.define('onigiri/animationmixer', [
     Onigiri
 ) {
     'use strict';
-    /* @snippet AnimationMixer - Onigiri
-    Onigiri.AnimationMixer({
-        object3D: $ {1},
-        startAnimation: '${2}'
-    }) */
-    Onigiri.AnimationMixer = function (settings) {
+    /* @snippet Onigiri.AnimationMixer()|Constructor
+Onigiri.AnimationMixer({
+    object3D: ${1:null},
+    startAnimation: '${2:idle}'
+}) 
+    */
+    var AnimationMixer = function (settings) {
         // --- Parameters ---
         var defaultAnimation = settings.defaultAnimation;
 
@@ -81,5 +86,9 @@ bento.define('onigiri/animationmixer', [
         };
         return mixerComponent;
     };
-    console.log("Onigiri: added Onigiri.AnimationMixer");
+    AnimationMixer.addToOnigiri = function () {
+        Onigiri.AnimationMixer = AnimationMixer;
+        console.log("Onigiri: added Onigiri.AnimationMixer");
+    };
+    return AnimationMixer;
 });
