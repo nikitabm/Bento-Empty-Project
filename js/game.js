@@ -63,7 +63,7 @@ window.startGame = function () {
             name: 'Empty Project',
             canvasId: 'canvas',
             renderer: 'three',
-            pixelSize: 3, // additional scaling
+            pixelSize: 1, // additional scaling
             antiAlias: false,
             useDeltaT: false,
             autoThrottle: false,
