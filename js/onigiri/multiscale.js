@@ -1,6 +1,6 @@
 // BROKEN NEEDS REWRITE
 
-bento.define('onigiri/utilities', [
+bento.define('onigiri/multiscale', [
     'bento/utils',
     'onigiri/onigiri'
 ], function (
@@ -8,7 +8,7 @@ bento.define('onigiri/utilities', [
     Onigiri
 ) {
     'use strict';
-    /* @snippet Onigiri.MultiScale.snippet
+    /* @snippet Onigiri.MultiScale()|Component
     Onigiri.MultiScale({
         mesh: ${1},
         scales: {
@@ -16,7 +16,7 @@ bento.define('onigiri/utilities', [
         }
     })
      */
-    Onigiri.MultiScale = function (settings) {
+    var MultiScale = function (settings) {
         var entity;
         var mesh = settings.mesh;
         var scaleNames = []; // keep track of scale names
@@ -77,5 +77,11 @@ bento.define('onigiri/utilities', [
         };
         return component;
     };
-    console.log("Onigiri: added Onigiri.MultiScale");
+    Utils.MultiScale = MultiScale;
+
+    Utils.addToOnigiri = function () {
+        Onigiri.MultiScale = MultiScale;
+        console.log("Onigiri: added Onigiri.MultiScale");
+    };
+    return Utils;
 });

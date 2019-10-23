@@ -1,13 +1,15 @@
 // NEEDS ONIGIRI INTEGRATION
 
-bento.define('onigiri/billboards', [
+bento.define('onigiri/billboard', [
     'bento/utils',
     'onigiri/onigiri',
-    'bento/components/sprite'
+    'bento/components/sprite',
+    'bento'
 ], function (
     Utils,
     Onigiri,
-    Sprite
+    Sprite,
+    Bento
 ) {
     'use strict';
     /* @snippet Billboard - Onigiri
@@ -19,7 +21,7 @@ bento.define('onigiri/billboards', [
         attached: function (data) {}
     });
     */
-    Onigiri.Billboard = function (settings) {
+    var Billboard = function (settings) {
         var texture = Bento.assets.getTexture(settings.image);
         var billboardMaterial = new THREE.SpriteMaterial({
             map: texture,
@@ -58,7 +60,6 @@ bento.define('onigiri/billboards', [
         };
         return component;
     };
-    console.log("Onigiri: added Onigiri.Billboard");
 
     /* @snippet Onigiri.SpriteBillboard.snippet
     Onigiri.SpriteBillboard({
@@ -78,7 +79,7 @@ bento.define('onigiri/billboards', [
         }
     })
      */
-    Onigiri.SpriteBillboard = function (settings) {
+    var SpriteBillboard = function (settings) {
         if (!(this instanceof Onigiri.SpriteBillboard)) {
             return new Onigiri.SpriteBillboard(settings);
         }
@@ -100,30 +101,30 @@ bento.define('onigiri/billboards', [
         this.name = settings.name || 'planeSprite';
     };
 
-    Onigiri.SpriteBillboard.prototype = Object.create(Sprite.prototype);
-    Onigiri.SpriteBillboard.prototype.constructor = Onigiri.SpriteBillboard;
+    SpriteBillboard.prototype = Object.create(Sprite.prototype);
+    SpriteBillboard.prototype.constructor = SpriteBillboard;
 
-    Onigiri.SpriteBillboard.prototype.start = function (data) {
+    SpriteBillboard.prototype.start = function (data) {
         if (this.autoAttach) {
             Onigiri.scene.add(this.container);
         }
     };
 
-    Onigiri.SpriteBillboard.prototype.destroy = function (data) {
+    SpriteBillboard.prototype.destroy = function (data) {
         if (this.autoAttach) {
             Onigiri.scene.remove(this.container);
         }
         this.dispose();
     };
 
-    Onigiri.SpriteBillboard.dispose = function () {
+    SpriteBillboard.dispose = function () {
         if (this.dispose && this.plane) {
             this.plane.geometry.dispose();
             this.plane.material.dispose();
         }
     };
 
-    Onigiri.SpriteBillboard.prototype.setup = function (data) {
+    SpriteBillboard.prototype.setup = function (data) {
         var spriteImage;
         var threeTexture;
         var plane;
@@ -194,7 +195,7 @@ bento.define('onigiri/billboards', [
             }
         }
     };
-    Onigiri.SpriteBillboard.prototype.update = function (data) {
+    SpriteBillboard.prototype.update = function (data) {
         Sprite.prototype.update.call(this, data);
 
         if (this.lastFrame !== this.currentFrame) {
@@ -204,11 +205,11 @@ bento.define('onigiri/billboards', [
         }
         this.lastFrame = this.currentFrame;
     };
-    Onigiri.SpriteBillboard.prototype.draw = function (data) {
+    SpriteBillboard.prototype.draw = function (data) {
         // BentoSprite is not responsible for drawing on screen, only calculating the UVs
     };
 
-    Onigiri.SpriteBillboard.prototype.updateUvs = function () {
+    SpriteBillboard.prototype.updateUvs = function () {
         //
         var sourceX = this.sourceX;
         var sourceY = this.sourceY;
@@ -241,7 +242,7 @@ bento.define('onigiri/billboards', [
         }
     };
 
-    Onigiri.SpriteBillboard.prototype.attached = function (data) {
+    SpriteBillboard.prototype.attached = function (data) {
         Sprite.prototype.attached.call(this, data);
 
         // inherit name
@@ -250,5 +251,13 @@ bento.define('onigiri/billboards', [
             this.plane.name = this.container.name + '.plane';
         }
     };
+
+    Billboard.addToOnigiri = function () {
+        Onigiri.Billboard = Billboard;
+        console.log("Onigiri: added Onigiri.Billboard");
+        Onigiri.SpriteBillboard = SpriteBillboard;
+        console.log("Onigiri: added Onigiri.SpriteBillboard");
+    };
     console.log("Onigiri: added Onigiri.SpriteBillboard");
+    return Billboard;
 });

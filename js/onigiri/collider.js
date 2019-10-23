@@ -1,4 +1,4 @@
-bento.define('onigiri/collisions', [
+bento.define('onigiri/collider', [
     'bento',
     'bento/math/vector2',
     'bento/eventsystem',
@@ -73,15 +73,15 @@ bento.define('onigiri/collisions', [
             }
         };
         /**
-     * Onigiri equivelant to entity.getBoundingBox returning a world scaled and translated Three Math shape 
-     * @function
-     * @instance
-     * @param {THREE.Vector3} [offset] - An offset in world units that the shape will be moved by
-     * @name collidesWith
-     * @snippet #Collider.getShape|Entity/Array
-getShape(new THREE.THREE.Vector3(0, 0, 0))
-     * @returns {Sphere/Box} The scaled and translated Mathematical shape
-     */
+         * Onigiri equivelant to entity.getBoundingBox returning a world scaled and translated Three Math shape 
+         * @function
+         * @instance
+         * @param {THREE.Vector3} [offset] - An offset in world units that the shape will be moved by
+         * @name collidesWith
+         * @snippet #Collider.getShape|Entity/Array
+            getShape(new THREE.THREE.Vector3(0, 0, 0))
+         * @returns {Sphere/Box} The scaled and translated Mathematical shape
+         */
         var getShape = function (offset) {
             //set default for offset
             offset = offset || new THREE.Vector3(0, 0, 0);
@@ -123,19 +123,19 @@ getShape(new THREE.THREE.Vector3(0, 0, 0))
         };
 
         /**
-     * Checks if thiscollider is colliding with another entity's or group of entities' colliders
-     * @function
-     * @instance
-     * @param {Object} settings
-     * @param {Entity} settings.entity - The other entity
-     * @param {Array} settings.entities - Or an array of entities to check with
-     * @param {String} settings.family - Or the name of the family to collide with
-     * @param {Entity} settings.rectangle - Or if you want to check collision with a shape directly instead of entity
-     * @param {Vector2} [settings.offset] - A position offset
-     * @param {CollisionCallback} [settings.onCollide] - Called when entities are colliding
-     * @param {Boolean} [settings.firstOnly] - For detecting only first collision or more, default true
-     * @name collidesWith
-     * @snippet #Collider.collidesWith|Entity/Array
+         * Checks if thiscollider is colliding with another entity's or group of entities' colliders
+         * @function
+         * @instance
+         * @param {Object} settings
+         * @param {Entity} settings.entity - The other entity
+         * @param {Array} settings.entities - Or an array of entities to check with
+         * @param {String} settings.family - Or the name of the family to collide with
+         * @param {Entity} settings.rectangle - Or if you want to check collision with a shape directly instead of entity
+         * @param {Vector2} [settings.offset] - A position offset
+         * @param {CollisionCallback} [settings.onCollide] - Called when entities are colliding
+         * @param {Boolean} [settings.firstOnly] - For detecting only first collision or more, default true
+         * @name collidesWith
+         * @snippet #Collider.collidesWith|Entity/Array
 collidesWith({
     entity: obj, // when you have the reference
     entities: [], // or when colliding with this array
@@ -148,7 +148,7 @@ collidesWith({
         // onCollide is not called if no collision occurred 
     }
 })
-     * @returns {Array} The collided entities, otherwise null
+         * @returns {Array} The collided entities, otherwise null
      */
         var collidesWith = function (params) {
             var offset = params.offset || new THREE.Vector3(0, 0, 0);
@@ -261,27 +261,40 @@ collidesWith({
         return collider;
     };
 
-    /* Makes a Box Collider Component, if a box isn't supplied it will be generated from the geometry of the entity3D it is attached to
-    @snippet BoxCollider - Onigiri
-    Onigiri.BoxCollider(new THREE.Box3(min, max));
-    */
-    Onigiri.BoxCollider = function (box) {
+    /**
+     * Makes a Box Collider Component, if a box isn't supplied it will be generated from the geometry of the entity3D it is attached to
+     * @snippet Onigiri.BoxCollider()|Collider
+        Onigiri.BoxCollider(new THREE.Box3(min, max));
+     */
+    var BoxCollider = function (box) {
         return new Collider({
             type: 'box',
             shape: box // if i am null i will be generated from the geometry
         });
     };
-    /* Makes a Sphere Collider Component, if a box isn't supplied it will be generated from the geometry of the entity3D it is attached to
-    @snippet SphereCollider - Onigiri
+    /** 
+     * Makes a Sphere Collider Component, if a box isn't supplied it will be generated from the geometry of the entity3D it is attached to
+     * @snippet Onigiri.SphereCollider()|Collider
         Onigiri.SphereCollider(new THREE.Sphere(center, radius));
-        */
-    Onigiri.SphereCollider = function (sphere) {
+    */
+    var SphereCollider = function (sphere) {
         return new Collider({
             type: 'sphere',
             shape: sphere // if i am null i will be generated from the geometry
         });
     };
-    console.log("Onigiri: added Onigiri.BoxCollider");
-    console.log("Onigiri: added Onigiri.SphereCollider");
     //TODO: Investigate possible usage of Seperating Axis Theorum for versatile collisions - Perhaps just leave this to a physics engine
+
+    Collider.BoxCollider = BoxCollider;
+    Collider.SphereCollider = SphereCollider;
+
+    Collider.addToOnigiri = function () {
+        Onigiri.Collider = Collider;
+        Onigiri.BoxCollider = BoxCollider;
+        Onigiri.SphereCollider = SphereCollider;
+        console.log("Onigiri: added Onigiri.Collider");
+        console.log("Onigiri: added Onigiri.BoxCollider");
+        console.log("Onigiri: added Onigiri.SphereCollider");
+    };
+    return Collider;
 });

@@ -80,15 +80,21 @@ bento.define('modules/physics', [
         sendMessageToWorker('initWorld', {});
     };
     var update = function () {
-        sendMessageToWorker('updateWorld', {
-            deltaTime: 1 / 60
-        });
+        sendMessageToWorker('updateWorld');
     };
     var destroy = function () {
         sendMessageToWorker('cleanWorld', {});
     };
     var addBody = function (options) {
-        //NEEDS ID
+        //reinterpret 3 quaternion
+        if (options.quaternion) {
+            options.quaternion = {
+                x: options.quaternion._x,
+                y: options.quaternion._y,
+                z: options.quaternion._z,
+                w: options.quaternion._w
+            };
+        }
         sendMessageToWorker('addBody', options);
     };
     var modifyProperties = function (options) {

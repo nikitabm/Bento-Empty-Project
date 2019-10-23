@@ -112,7 +112,7 @@ void main() {
         // attached: function (data) {},
     })
      */
-    Onigiri.ParticleSystem = function (settings) {
+    var ParticleSystem = function (settings) {
         // create the particle variables
         var textures = getTextures(settings.textures);
         var standardColor = Utils.getDefault(settings.color, 0xFFFFFF);
@@ -265,5 +265,9 @@ void main() {
         };
         return component;
     };
-    console.log("Onigiri: added Onigiri.ParticleSystem");
+    ParticleSystem.addToOnigiri = function () {
+        Onigiri.ParticleSystem = ParticleSystem;
+        console.log("Onigiri: added Onigiri.ParticleSystem");
+    };
+    return ParticleSystem;
 });

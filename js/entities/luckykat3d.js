@@ -39,9 +39,10 @@ bento.define('entities/luckykat3d', [
 
         // --- Components ---
         var controls = new Onigiri.ClickCaster({
+            recursive: false,
             raycastMesh: mesh.children[1],
-            pointerDownCast: function (castData) {
-                if (castData) {
+            pointerDownCast: function (data) {
+                if (data.castData) {
                     new Tween({
                         from: 0.25,
                         to: 0,
@@ -67,6 +68,8 @@ bento.define('entities/luckykat3d', [
             position: new THREE.Vector3(0, 0, 0),
             euler: new THREE.Euler(0, 0, 0),
             scale: new THREE.Vector3(1, 1, 1),
+            castShadow: true,
+            receiveShadow: true,
             components: [
                 new Onigiri.AnimationMixer({
                     defaultAnimation: 'idle'

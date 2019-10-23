@@ -47,17 +47,23 @@ bento.define('screens/main', [
     'use strict';
     var onShow = function () {
         // --- Start Onigiri ---
-        new Onigiri({
+        var onigiri = new Onigiri({
             backgroundColor: '#33ddff',
-            cameraFieldOfView: 45
+            camera: {
+                cameraStyle: 'perspective',
+                perspectiveFieldOfView: 45
+            },
+            shadows: true
         });
+        Bento.objects.attach(onigiri);
 
         // --- Some Lighting ---
         var sun = new Sun({
             color: '#fff',
             directionalIntensity: 0.2,
             ambientIntensity: 0.8,
-            position: new THREE.Vector3(5, 10, 5)
+            position: new THREE.Vector3(5, 10, 5),
+            castShadow: true
         });
         Bento.objects.attach(sun);
 
@@ -85,8 +91,8 @@ bento.define('screens/main', [
                     blending: THREE.NormalBlending
                 }),
                 parameters: [
-                    10000,
-                    10000
+                    10,
+                    10
                 ]
             });
             Physics.addBody({
@@ -101,8 +107,8 @@ bento.define('screens/main', [
             });
             Bento.objects.attach(floor);
         };
-        var addCube = function () {
-            var position = new THREE.Vector3(0, 10, 0);
+        var addCube = function (x, y, z) {
+            var position = new THREE.Vector3(x, y, z);
             var cube = new Onigiri.Primitive({
                 shape: 'cube',
                 position: position,
@@ -128,10 +134,11 @@ bento.define('screens/main', [
                 id: cube.id,
                 shape: {
                     type: 'Box',
-                    arguments: [new CANNON.Vec3(0.1, 0.1, 0.1)]
+                    arguments: [new THREE.Vector3(0.5, 0.5, 0.5)]
                 },
                 mass: 1,
-                position: position
+                position: cube.position,
+                quaternion: cube.quaternion
             });
             Bento.objects.attach(cube);
         };
@@ -142,12 +149,16 @@ bento.define('screens/main', [
                 name: 'physicsControllerBehaviour',
                 start: function () {
                     Physics.init({});
+                    addFloor();
+                    for (var i = 0; i < 200; i++) {
+                        addCube(
+                            Utils.getRandomRangeFloat(-1, 1),
+                            2 + (i * 2),
+                            Utils.getRandomRangeFloat(-1, 1)
+                        );
+                    }
                 },
                 update: function () {
-                    if (physicsController.ticker === 60) {
-                        addFloor();
-                        addCube();
-                    }
                     Physics.update({});
                 },
                 destroy: function () {

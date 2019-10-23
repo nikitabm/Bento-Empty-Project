@@ -61,21 +61,24 @@ bento.define('init', [
         antiAliasing();
         initLocalization();
 
-        // enable extensions for onigiri
-        Onigiri.setup([
-            'utilities',
-            'primitives',
-            'animationmixer',
-            'billboards',
-            'particlesystem',
-            'collisions'
-        ]);
-
         /**
          * Start preloader
          */
         Bento.assets.load('preloader', function (err) {
-            Bento.screens.show('screens/preloader');
+            // enable extensions for onigiri
+            Onigiri.setup({
+                extensions: [
+                    'onigiri/animationmixer',
+                    'onigiri/clickcaster',
+                    'onigiri/collider',
+                    'onigiri/entity3d',
+                    'onigiri/light',
+                    'onigiri/primitive',
+                ],
+                onComplete: function () {
+                    Bento.screens.show('screens/preloader');
+                }
+            });
         });
     };
 });
