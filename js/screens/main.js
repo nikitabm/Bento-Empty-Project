@@ -21,7 +21,7 @@ bento.define('screens/main', [
     'components/sun',
     'entities/camera360',
     'onigiri/onigiri',
-    'modules/physics'
+    'onigiri/physics'
 ], function (
     Bento,
     Vector2,
@@ -82,7 +82,7 @@ bento.define('screens/main', [
         var addFloor = function () {
             var floor = new Onigiri.Primitive({
                 shape: 'plane',
-                position: new THREE.Vector3(0, -0.2, 0),
+                position: new THREE.Vector3(0, 0, 0),
                 euler: new THREE.Euler(-Math.PI * 0.5, 0, 0),
                 material: new THREE.MeshPhongMaterial({
                     color: 0xe0f9ff,
@@ -91,23 +91,22 @@ bento.define('screens/main', [
                     blending: THREE.NormalBlending
                 }),
                 parameters: [
-                    10,
-                    10
-                ]
+                    1000,
+                    1000
+                ],
+                castShadow: false,
+                recieveShadow: true
             });
             Physics.addBody({
                 id: floor.id,
-                shape: {
-                    type: 'Plane',
-                    arguments: []
-                },
+                shape: new Physics.CannonClass('Plane', []),
                 mass: 0,
-                position: floor.position,
-                quaternion: floor.quaternion
+                position: Physics.threeToCannon(floor.position),
+                quaternion: Physics.threeToCannon(floor.quaternion)
             });
             Bento.objects.attach(floor);
         };
-        var addCube = function (x, y, z) {
+        var addCube = function (x, y, z, scale) {
             var position = new THREE.Vector3(x, y, z);
             var cube = new Onigiri.Primitive({
                 shape: 'cube',
@@ -115,9 +114,9 @@ bento.define('screens/main', [
                 rotation: new THREE.Euler(0, 0, 0),
                 scale: new THREE.Vector3(1, 1, 1),
                 parameters: [
-                    1, // width
-                    1, // height
-                    1, // depth
+                    scale, // width
+                    scale, // height
+                    scale, // depth
                 ],
                 material: new THREE.MeshStandardMaterial({
                     color: '#ffffff',
@@ -129,42 +128,100 @@ bento.define('screens/main', [
                     side: THREE.FrontSide,
                     blending: THREE.NormalBlending
                 }),
+                castShadow: true,
+                recieveShadow: false
             });
             Physics.addBody({
                 id: cube.id,
-                shape: {
-                    type: 'Box',
-                    arguments: [new THREE.Vector3(0.5, 0.5, 0.5)]
-                },
-                mass: 1,
-                position: cube.position,
-                quaternion: cube.quaternion
+                shape: new Physics.CannonClass('Box', [new Physics.CannonClass('Vec3', [scale * 0.5, scale * 0.5, scale * 0.5])]),
+                mass: scale * scale * scale * 0.1,
+                position: Physics.threeToCannon(cube.position),
+                quaternion: Physics.threeToCannon(cube.quaternion)
+            }, function () {
+                Bento.objects.attach(cube);
             });
-            Bento.objects.attach(cube);
+            return cube;
+        };
+
+        var addCannonBall = function (x, y, z, scale) {
+            var position = new THREE.Vector3(x, y, z);
+            var cube = new Onigiri.Primitive({
+                shape: 'sphere',
+                position: position,
+                rotation: new THREE.Euler(0, 0, 0),
+                scale: new THREE.Vector3(1, 1, 1),
+                parameters: [
+                    scale,
+                    12, // height
+                    12, // depth
+                ],
+                material: new THREE.MeshStandardMaterial({
+                    color: '#ffffff',
+                    roughness: 0.5,
+                    metalness: 0,
+                    transparent: true,
+                    opacity: 1,
+                    depthWrite: true,
+                    side: THREE.FrontSide,
+                    blending: THREE.NormalBlending
+                }),
+                castShadow: true,
+                recieveShadow: false
+            });
+            Physics.addBody({
+                id: cube.id,
+                shape: new Physics.CannonClass('Sphere', [scale]),
+                mass: (4 / 3) * Math.PI * (scale * scale * scale),
+                position: Physics.threeToCannon(cube.position),
+                quaternion: Physics.threeToCannon(cube.quaternion),
+                velocity: Physics.threeToCannon(new THREE.Vector3(0, 0, -60)),
+            }, function () {
+                Bento.objects.attach(cube);
+            });
+            return cube;
         };
 
         var physicsController = new Entity({
             name: 'physicsController',
             components: [{
-                name: 'physicsControllerBehaviour',
-                start: function () {
-                    Physics.init({});
-                    addFloor();
-                    for (var i = 0; i < 200; i++) {
-                        addCube(
-                            Utils.getRandomRangeFloat(-1, 1),
-                            2 + (i * 2),
-                            Utils.getRandomRangeFloat(-1, 1)
-                        );
+                    name: 'physicsControllerBehaviour',
+                    start: function () {
+                        Physics.init({
+                            solver: {
+                                iterations: 5,
+                                tolerance: 0.01
+                            }
+                        }, function () {
+                            addFloor();
+                            for (var i = 0; i < 5; i++) {
+                                for (var j = 0; j < 40; j++) {
+                                    addCube(
+                                        0,
+                                        (i * 2) + 1, -(j * 2.1) + (i % 2 === 0 ? 0.9 : 0),
+                                        2
+                                    );
+                                }
+                            }
+                        });
+                    },
+                    update: function () {
+                        Physics.update({});
+                    },
+                    destroy: function () {
+                        Physics.destroy({});
                     }
                 },
-                update: function () {
-                    Physics.update({});
-                },
-                destroy: function () {
-                    Physics.destroy({});
-                }
-            }]
+                new Clickable({
+                    pointerDown: function (data) {
+                        var cannonBall = addCannonBall(
+                            0,
+                            5,
+                            10,
+                            3
+                        );
+                    }
+                })
+            ]
         });
         Bento.objects.attach(physicsController);
     };
