@@ -69,7 +69,7 @@ bento.define('screens/main', [
 
         // --- Da Lucky Kat ---
         var luckyKat3d = LuckyKat3d({});
-        //Bento.objects.attach(luckyKat3d);
+        Bento.objects.attach(luckyKat3d);
 
         // --- Camera ---
         var camera360 = new Camera360({
@@ -95,7 +95,7 @@ bento.define('screens/main', [
                     1000
                 ],
                 castShadow: false,
-                recieveShadow: true
+                receiveShadow: true
             });
             Physics.addBody({
                 id: floor.id,

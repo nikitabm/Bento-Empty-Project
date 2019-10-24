@@ -25,12 +25,12 @@ bento.define('components/sun', [
             directionalLight.lightObject.castShadow = true;
             directionalLight.lightObject.shadow.radius = 2;
             // directionalLight.lightObject.shadow.bias = -0.001;
-            directionalLight.lightObject.shadow.mapSize.width = 512;
-            directionalLight.lightObject.shadow.mapSize.height = 512;
-            directionalLight.lightObject.shadow.camera.left = -3;
-            directionalLight.lightObject.shadow.camera.right = 3;
-            directionalLight.lightObject.shadow.camera.top = 3;
-            directionalLight.lightObject.shadow.camera.bottom = -3;
+            directionalLight.lightObject.shadow.mapSize.width = 1024;
+            directionalLight.lightObject.shadow.mapSize.height = 1024;
+            directionalLight.lightObject.shadow.camera.left = -150;
+            directionalLight.lightObject.shadow.camera.right = 150;
+            directionalLight.lightObject.shadow.camera.top = 150;
+            directionalLight.lightObject.shadow.camera.bottom = -150;
             directionalLight.lightObject.shadow.camera.near = 0.5;
             directionalLight.lightObject.shadow.camera.far = 25;
 
