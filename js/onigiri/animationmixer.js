@@ -1,7 +1,3 @@
-/**
- * Animation mixer
- * @moduleName AnimationMixer
- */
 bento.define('onigiri/animationmixer', [
     'bento/utils',
     'onigiri/onigiri'
@@ -10,77 +6,119 @@ bento.define('onigiri/animationmixer', [
     Onigiri
 ) {
     'use strict';
-    /* @snippet Onigiri.AnimationMixer()|Constructor
-Onigiri.AnimationMixer({
-    object3D: ${1:null},
-    startAnimation: '${2:idle}'
-}) 
-    */
+    /* @snippet AnimationMixer - Onigiri
+    Onigiri.AnimationMixer({
+        object3D: $ {1},
+        defaultAnimation: '${2}'
+    }) */
     var AnimationMixer = function (settings) {
         // --- Parameters ---
+        var targetObject3D = settings.object3D;
         var defaultAnimation = settings.defaultAnimation;
+        var defaultAnimationWeight = settings.defaultAnimationWeight || 0;
+        var defaultAnimationSpeed = settings.defaultAnimationSpeed || 1;
+        var loopAnimations = Utils.getDefault(settings.loopAnimations, true);
 
         // --- Variables ---
         var mixer;
-        var animationNames = [];
-        var animationSequence = {};
+        var currentAnimationSpeed = 1;
+        var actions = {};
+        var actionInfo = {};
+
+        // --- Functions ---
+        var processAnimations = function () {
+            Utils.forEach(targetObject3D.animations, function (animation, i) {
+                var lastIndex = animation.name.lastIndexOf('|') + 1;
+                var animationName = animation.name.substring(lastIndex);
+                if (!animationName) {
+                    return;
+                }
+                if (!animation[animationName]) {
+                    actions[animationName] = mixer.clipAction(targetObject3D.animations[i]);
+                    actions[animationName].setEffectiveWeight(defaultAnimationWeight);
+                    actions[animationName].setEffectiveTimeScale(defaultAnimationSpeed);
+                    actions[animationName].setLoop(loopAnimations ? THREE.LoopRepeat : THREE.LoopOnce, Infinity);
+                    actions[animationName].clampWhenFinished = true;
+                    actionInfo[animationName] = {
+                        weight: defaultAnimationWeight,
+                        speed: defaultAnimationSpeed
+                    };
+                    actions[animationName].play();
+                }
+            });
+        };
+        var setCurrentTime = function (timeInSeconds) {
+            if (!mixer) {
+                return;
+            }
+            mixer.time = 0; // Zero out time attribute for AnimationMixer object;
+            for (var i = 0; i < mixer._actions.length; i++) {
+                mixer._actions[i].time = 0; // Zero out time attribute for all associated AnimationAction objects.
+            }
+            return mixer.update(timeInSeconds); // Update used to set exact time. Returns "this" AnimationMixer object.
+        };
+        var setAnimationWeight = function (animationName, weight) {
+            if (!mixer) {
+                return;
+            }
+            //does the animation exist
+            var animationClip = actions[animationName];
+            if (animationClip) {
+                actions[animationName].setEffectiveWeight(weight);
+                actionInfo[animationName].weight = weight;
+            }
+        };
+        var setAnimationSpeed = function (animationName, speed) {
+            if (!mixer) {
+                return;
+            }
+            //does the animation exist
+            var animationClip = actions[animationName];
+            if (animationClip) {
+                actions[animationName].setEffectiveTimeScale(speed);
+                actionInfo[animationName].speed = speed;
+            }
+        };
 
         // --- Component ---
         var mixerComponent = {
             name: 'mixerComponent',
-            animationSpeed: settings.animationSpeed || 1,
-            object3D: settings.object3D,
             start: function (data) {
-                // find object3D if it doesn't exist
-                if (!this.object3D) {
-                    this.object3D = this.parent.object3D;
+                // find the relevant object3D if it doesn't exist
+                if (!targetObject3D) {
+                    targetObject3D = this.parent.object3D;
                 }
-                if (this.object3D.animations) {
-                    mixer = new THREE.AnimationMixer(this.object3D);
-                    this.processAnimations();
+                if (targetObject3D.animations) {
+                    //make a new animation mixer
+                    mixer = new THREE.AnimationMixer(targetObject3D);
+                    //create a list of animations
+                    processAnimations();
+                    //if we have a default animation if we have one
                     if (defaultAnimation && this.hasAnimation(defaultAnimation)) {
-                        this.startAnimation(defaultAnimation); // start the defaul animation
+                        setAnimationWeight(defaultAnimation, 1, true);
                     }
+                } else {
+                    Utils.log('Onigiri.Animator: No animations on Object3D!');
                 }
             },
             update: function (data) {
-                if (mixer) {
-                    mixer.update((1 / 60) * this.animationSpeed * data.speed); // update the animation
+                if (!mixer) {
+                    return;
                 }
-            },
-            processAnimations: function () {
-                var stripped, lastIndex;
-                Utils.forEach(this.object3D.animations, function (animation, i) {
-                    lastIndex = animation.name.lastIndexOf('|') + 1;
-                    stripped = animation.name.substring(lastIndex);
-                    if (!stripped) {
-                        return;
-                    }
-                    if (!animationSequence[stripped]) {
-                        animationSequence[stripped] = [];
-                        animationNames.push(stripped);
-                    }
-                    animationSequence[stripped].push(i);
-                });
+                // update the animation
+                mixer.update((1 / 60) * currentAnimationSpeed * data.speed);
             },
             hasAnimation: function (animation) {
-                return animationNames.indexOf(animation) > -1;
+                return Utils.isDefined(actions[animation]);
             },
             getAnimations: function () {
-                return [].concat(animationNames);
+                return actions;
             },
-            startAnimation: function (animation) {
-                var i, action, clip, sequence;
-                sequence = animationSequence[animation];
-                if (sequence) {
-                    for (i = 0; i < sequence.length; i++) {
-                        clip = this.object3D.animations[sequence[i]];
-                        action = mixer.clipAction(clip);
-                        action.play();
-                    }
-                }
-            },
-            stop: function () {
+
+            setCurrentTime: setCurrentTime,
+            setAnimationWeight: setAnimationWeight,
+            setAnimationSpeed: setAnimationSpeed,
+            clearAnimations: function () {
                 mixer.stopAllAction();
             }
         };
