@@ -9,7 +9,8 @@ bento.define('init', [
     'bento/eventsystem',
     'utils',
     'modules/localization',
-    'onigiri/onigiri'
+    'onigiri/onigiri',
+    'onigiri/physics'
 ], function (
     Bento,
     Vector2,
@@ -18,7 +19,8 @@ bento.define('init', [
     EventSystem,
     Utils,
     Localization,
-    Onigiri
+    Onigiri,
+    Physics
 ) {
     'use strict';
     return function () {
@@ -57,9 +59,16 @@ bento.define('init', [
             }
         };
 
+        var initPhysics = function () {
+            Physics.initiate({
+                iterations: 10
+            });
+        };
+
         clearScreen();
         antiAliasing();
         initLocalization();
+        initPhysics();
 
         /**
          * Start preloader
@@ -74,6 +83,10 @@ bento.define('init', [
                     'onigiri/entity3d',
                     'onigiri/light',
                     'onigiri/primitive',
+                    'onigiri/physics',
+                    'onigiri/rigidbody',
+                    'onigiri/constraint',
+                    'onigiri/ragdoll'
                 ],
                 onComplete: function () {
                     Bento.screens.show('screens/preloader');
