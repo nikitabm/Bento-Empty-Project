@@ -107,7 +107,7 @@ bento.define('onigiri/entity3d', [
             object3D.traverse(function (o3D) {
                 o3D.castShadow = Utils.getDefault(settings.castShadow, false);
                 o3D.receiveShadow = Utils.getDefault(settings.receiveShadow, false);
-            });            
+            });
         }
 
         // Directly put a reference to the entity3D in the object3D. this is the object3D
@@ -144,7 +144,14 @@ bento.define('onigiri/entity3d', [
                 object3D.rotation.set(newEuler.x, newEuler.y, newEuler.z);
             }
         });
-        // TODO: QUATERNION ROTATION
+        Object.defineProperty(entity3D, 'quaternion', {
+            get: function () {
+                return object3D.quaternion;
+            },
+            set: function (newQuaternion) {
+                object3D.quaternion.set(newQuaternion.x, newQuaternion.y, newQuaternion.z, newQuaternion.w);
+            }
+        });
         // expose the scale of the object3D
         Object.defineProperty(entity3D, 'scale', {
             get: function () {
