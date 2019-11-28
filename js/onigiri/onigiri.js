@@ -14,7 +14,7 @@ bento.define('onigiri/onigiri', [
     Utils
 ) {
     'use strict';
-    var VERSION = "v1.0.2";
+    var VERSION = "v1.0.3";
 
     // THREE object references
     var onigiriRenderer = null;
