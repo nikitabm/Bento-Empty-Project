@@ -16,8 +16,7 @@ bento.define('screens/preloader', [
     'bento/tween',
     'entities/luckykatlogo',
     'globals',
-    'modules/localization',
-    'managers/meshmanager'
+    'modules/localization'
 ], function (
     Bento,
     Vector2,
@@ -33,8 +32,7 @@ bento.define('screens/preloader', [
     Tween,
     LuckyKat,
     Globals,
-    Localization,
-    MeshManager
+    Localization
 ) {
     'use strict';
     var initPostPreloader = function () {
@@ -107,17 +105,8 @@ bento.define('screens/preloader', [
                 text.setText('Loading ' + current + '/' + total);
             },
             onReady: function () {
-                Bento.assets.loadMesh('3d', function (error, groupName) {
-                        loaded = true;
-                        end();
-                    },
-                    function (current, total, assetName) {
-                        // single asset loaded callback
-                    },
-                    function (materialNode) {
-                        // callback to manipulate materials before creation
-                    }
-                );
+                loaded = true;
+                end();
             }
         });
     };
