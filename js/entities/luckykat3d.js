@@ -72,6 +72,7 @@ bento.define('entities/luckykat3d', [
             receiveShadow: true,
             components: [
                 new Onigiri.AnimationMixer({
+                    object3D: mesh,
                     defaultAnimation: 'idle'
                 }),
                 controls
