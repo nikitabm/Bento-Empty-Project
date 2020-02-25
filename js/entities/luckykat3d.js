@@ -15,7 +15,10 @@ bento.define('entities/luckykat3d', [
     'bento/gui/text',
     'bento/utils',
     'bento/tween',
-    'onigiri/onigiri'
+    'onigiri/onigiri',
+    'onigiri/clickcaster',
+    'onigiri/entity3d',
+    'onigiri/animationmixer'
 ], function (
     Bento,
     Vector2,
@@ -29,7 +32,10 @@ bento.define('entities/luckykat3d', [
     Text,
     Utils,
     Tween,
-    Onigiri
+    Onigiri,
+    ClickCaster,
+    Entity3D,
+    AnimationMixer
 ) {
     'use strict';
     return function (settings) {
@@ -38,7 +44,7 @@ bento.define('entities/luckykat3d', [
         mesh.children[1].material.emissiveIntensity = 0; // why is this enabled by default?
 
         // --- Components ---
-        var controls = new Onigiri.ClickCaster({
+        var controls = new ClickCaster({
             recursive: false,
             raycastMesh: mesh.children[1],
             pointerDownCast: function (data) {
@@ -61,7 +67,7 @@ bento.define('entities/luckykat3d', [
         });
 
         // --- Entity ---
-        var entity = new Onigiri.Entity3D({
+        var entity = new Entity3D({
             name: 'luckyKat3d',
             family: [''],
             object3D: mesh,
@@ -71,7 +77,7 @@ bento.define('entities/luckykat3d', [
             castShadow: true,
             receiveShadow: true,
             components: [
-                new Onigiri.AnimationMixer({
+                new AnimationMixer({
                     object3D: mesh,
                     defaultAnimation: 'idle'
                 }),

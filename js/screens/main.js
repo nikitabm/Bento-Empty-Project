@@ -20,7 +20,8 @@ bento.define('screens/main', [
     'entities/luckykat3d',
     'components/sun',
     'entities/camera360',
-    'onigiri/onigiri'
+    'onigiri/onigiri',
+    'onigiri/primitive'
 ], function (
     Bento,
     Vector2,
@@ -40,7 +41,8 @@ bento.define('screens/main', [
     LuckyKat3d,
     Sun,
     Camera360,
-    Onigiri
+    Onigiri,
+    Primitive
 ) {
     'use strict';
     var onShow = function () {
@@ -66,7 +68,7 @@ bento.define('screens/main', [
         Bento.objects.attach(sun);
 
         // --- Infinite Floor Plane ---
-        var floor = new Onigiri.Primitive({
+        var floor = new Primitive({
             shape: 'plane',
             position: new THREE.Vector3(0, -0.2, 0),
             euler: new THREE.Euler(-Math.PI * 0.5, 0, 0),
