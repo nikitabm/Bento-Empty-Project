@@ -76,6 +76,14 @@ bento.define('modules/localization', [
          * Get string of current language
          * @param {String} key - key value of json
          */
+        /**
+         * @snippet Localization.getText()|String
+        Localization.getText('$1')
+         */
+        /**
+         * @snippet Localization.getText()|String+Replacment
+        Localization.getText('$1').replace('{$2}', '$3')
+         */
         getText: function (key) {
             var string = languageJson[key];
             if (!Utils.isDefined(string)) {
