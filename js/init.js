@@ -59,12 +59,13 @@ bento.define('init', [
 
         clearScreen();
         antiAliasing();
-        initLocalization();
 
         /**
          * Start preloader
          */
         Bento.assets.load('preloader', function (err) {
+            initLocalization();
+
             // enable extensions for onigiri
             Onigiri.setup({
                 extensions: [
