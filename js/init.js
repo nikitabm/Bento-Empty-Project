@@ -39,13 +39,13 @@ bento.define('init', [
             EventSystem.on('touchcancel', Bento.input.resetPointers);
         };
 
-        initLocalization();
         inputSafety();
 
         /**
          * Start preloader
          */
         Bento.assets.load('preloader', function (err) {
+            initLocalization();
             Bento.screens.show('screens/preloader');
         });
     };
