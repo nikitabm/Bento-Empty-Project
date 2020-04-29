@@ -32,7 +32,7 @@
     </platform>
     <engine name="android" spec="^8.0.0" />
     <engine name="ios" spec="^5.0.0" />
-    <preference name="android-minSdkVersion" value="19" />
+    <preference name="android-minSdkVersion" value="21" />
     <preference name="WKPort" value="8080" />
 
     <platform name="ios">
