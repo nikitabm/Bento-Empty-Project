@@ -40,6 +40,7 @@
         "gulp-inline": "*",
         "mimer": "*",
         "lz-string": "*",
-        "xml2js": "*"
+        "xml2js": "*",
+        "s3":"*"
     }
 }

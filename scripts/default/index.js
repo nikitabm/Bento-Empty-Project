@@ -4,7 +4,7 @@ var gulp = require('gulp');
 require('./subsetfonts');
 require('./subtasks');
 require('./generate-icons');
-
+require('./playables');
 /**
  * Generic build, suitable for Cordova (not Cocoon), usable on Web but build-web is preferred as Web deployment
  */
@@ -60,6 +60,32 @@ gulp.task('build-compact',
         'cleanInline'
     )
 );
+
+gulp.task('build-playable',
+    gulp.series(
+        'checkWww',
+        'build-web',
+        'compress-game-js',
+        'inline-assets',
+        'add-assets-js',
+        'inline-html',
+        'cleanInline'
+    )
+);
+
+gulp.task('build-playable-upload',
+    gulp.series(
+        'checkWww',
+        'build-web',
+        'compress-game-js',
+        'inline-assets',
+        'add-assets-js',
+        'inline-html',
+        'cleanInline',
+        'upload-playable'
+    )
+);
+
 gulp.task('build-cocoonjs', gulp.series(
     'checkWww',
     'ogg-only',
